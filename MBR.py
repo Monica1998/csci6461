@@ -1,3 +1,4 @@
+#stores the instruction fetched from mem
 class MBR:
     def __init__(self,word):
         self.word = None
