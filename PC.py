@@ -3,10 +3,10 @@ class ProgramCounter:
         self.addr = addr
     
     def get_addr(self):
-        return addr
+        return self.addr
     
     def set_addr(self,addr):
         self.addr = addr
     
-    def incrememnt_addr(self):
+    def increment_addr(self):
         self.addr += 1

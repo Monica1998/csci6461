@@ -4,7 +4,7 @@ class IndexRegister:
         self.val = val
 
     def get_val(self):
-        return decimal_to_binary(self.val)
+        return self.val
 
     def set_val(self,val):
         self.val = val

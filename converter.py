@@ -4,3 +4,7 @@ def hex_to_decimal(hex):
 
 def decimal_to_binary(dec):
     return '{0:016b}'.format(dec)
+
+def hex_to_binary(hex):
+    temp = hex_to_decimal(hex)
+    return decimal_to_binary(temp)

@@ -2,26 +2,30 @@ from converter import hex_to_decimal
 class Memory:
     def __init__(self,size=2048):
         self.size = size
-        self.words = [0 for i in range(size)] #index is memory location 
+        self.words = dict() #index is memory location 
+        # self.instructions = dict()
+        # self.data = dict()
+        self.start = 0
     
-    def read_mem(self,file):
-        with open('IPL.txt', 'r') as f:
+    def read_mem(self):
+        with open('/Users/vishesh.javangula@ibm.com/Documents/Computer_Architecture/proj_1_4641/IPL.txt', 'r') as f:
             lines = f.readlines()
+            if len(lines) > self.size:
+                return 'Memory file too large' #is this right? or should I only consider the valid instructions
             for line in lines:
                 addr, val = line.split(' ')[:2]
             #convert hex to interger and store at this index, the value should be integer? 
                 addr = hex_to_decimal(addr)
                 val = hex_to_decimal(val)
-                print('writing val = {} to addr = {}'.format(val,addr))
+                # if val >= 2**6: #we assumed the address space is the integer space 
+                #     self.instructions[addr] = val
+                # else:
+                #     self.data[addr] = val
                 self.words[addr] = val
-    
-
 
 #for testing purposes
 def main():
-    mem = Memory()
-    mem.read_mem('IPL.txt')
-    print(mem.words)
+    print('{0:016b}'.format(6))
     
 if __name__ == '__main__':
     main()
