@@ -7,8 +7,8 @@ class Memory:
         # self.data = dict()
         self.start = 0
     
-    def read_mem(self):
-        with open('/Users/vishesh.javangula@ibm.com/Documents/Computer_Architecture/proj_1_4641/IPL.txt', 'r') as f:
+    def read_mem(self, fileName):
+        with open(fileName, 'r') as f:
             lines = f.readlines()
             if len(lines) > self.size:
                 return 'Memory file too large' #is this right? or should I only consider the valid instructions
