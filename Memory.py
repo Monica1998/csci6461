@@ -15,6 +15,8 @@ class Memory:
             if len(lines) > self.size:
                 return 'Memory file too large'  # is this right? or should I only consider the valid instructions
             for line in lines:
+                if line.startswith('#'):
+                    continue
                 addr, val = line.split(' ')[:2]
                 # convert hex to interger and store at this index, the value should be integer?
                 addr = hex_to_decimal(addr)

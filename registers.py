@@ -38,7 +38,7 @@ class IR():
         # process self.instruciton
         opcode = self.instruction % 2 ** 6
         operand = self.instruction // 2 ** 11
-        index_register = (self.instruction // 2 * 8) % 2 ** 2
+        index_register = (self.instruction // 2 ** 8) % 2 ** 2
         mode = (self.instruction // 2 ** 10) % 2 ** 1
         general_register = (self.instruction // 2 ** 6) % 2 ** 2
         return opcode, operand, index_register, mode, general_register

@@ -46,13 +46,13 @@ class CPU:
         effective_addr = self.get_effective_addr(operand, index_register, mode)
 
         self.MBR.set_val(self.Memory.words[effective_addr])
-        self.IndexRegisters[index_register].set_val(self.MBR.get_val())
+        self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
 
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
 
         self.MAR.set_val(effective_addr)
-        self.MBR.set_val(self.IndexRegisters[index_register].get_val())
+        self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         self.Memory[self.MAR.get_val()] = self.MBR.get_val()
 
     def HALT(self):
@@ -64,16 +64,16 @@ class CPU:
                 if self.check_addr(operand):
                     return operand
             else:
-                if self.check_addr(operand + self.IndexRegisters[index_register].get_val()):
-                    return operand + self.IndexRegisters[index_register].get_val()
+                if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
+                    return operand + self.IndexRegisters[index_register - 1].get_val()
         elif mode == 1:
             if index_register == 0:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
                     self.MBR.set_val(self.Memory[self.MAR.get_val()])
             else:
-                if self.check_addr(operand + self.IndexRegisters[index_register]):
-                    self.MAR.set_val(operand + self.IndexRegisters[index_register])
+                if self.check_addr(operand + self.IndexRegisters[index_register - 1]):
+                    self.MAR.set_val(operand + self.IndexRegisters[index_register - 1])
                     self.MBR.set_val(self.Memory[self.MAR.get_val()])
             return self.MBR.get_val()
         return 0

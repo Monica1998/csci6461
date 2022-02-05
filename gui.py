@@ -598,55 +598,91 @@ def LD_MBR():
 
 
 def show_general_register(general_register):
-    GPR0.delete(0, END)
-    GPR1.delete(0, END)
-    GPR2.delete(0, END)
-    GPR3.delete(0, END)
+    # GPR0.delete(0, END)
+    # GPR1.delete(0, END)
+    # GPR2.delete(0, END)
+    # GPR3.delete(0, END)
     match general_register:
         case 0:
-            GPR1.insert(0, '0' * 16)
-            GPR2.insert(0, '0' * 16)
-            GPR3.insert(0, '0' * 16)
+            # GPR1.insert(0, '0' * 16)
+            # GPR2.insert(0, '0' * 16)
+            # GPR3.insert(0, '0' * 16)
+            GPR0.delete(0, END)
             GPR0.insert(0, str(decimal_to_binary(cpu.GRs[0].get_val())))
         case 1:
-            GPR0.insert(0, '0' * 16)
-            GPR2.insert(0, '0' * 16)
-            GPR3.insert(0, '0' * 16)
+            # GPR0.insert(0, '0' * 16)
+            # GPR2.insert(0, '0' * 16)
+            # GPR3.insert(0, '0' * 16)
+            GPR1.delete(0, END)
             GPR1.insert(0, str(decimal_to_binary(cpu.GRs[1].get_val())))
         case 2:
-            GPR0.insert(0, '0' * 16)
-            GPR1.insert(0, '0' * 16)
-            GPR3.insert(0, '0' * 16)
+            # GPR0.insert(0, '0' * 16)
+            # GPR1.insert(0, '0' * 16)
+            # GPR3.insert(0, '0' * 16)
+            GPR2.delete(0, END)
             GPR2.insert(0, str(decimal_to_binary(cpu.GRs[2].get_val())))
         case 3:
-            GPR0.insert(0, '0' * 16)
-            GPR1.insert(0, '0' * 16)
-            GPR2.insert(0, '0' * 16)
+            # GPR0.insert(0, '0' * 16)
+            # GPR1.insert(0, '0' * 16)
+            # GPR2.insert(0, '0' * 16)
+            GPR3.delete(0, END)
             GPR3.insert(0, str(decimal_to_binary(cpu.GRs[3].get_val())))
 
 
 def show_index_register(index_register):
+    # IXR1.delete(0, END)
+    # IXR2.delete(0, END)
+    # IXR3.delete(0, END)
+    match index_register:
+        case 0:
+            pass
+            # IXR1.insert(0, '0' * 16)
+            # IXR2.insert(0, '0' * 16)
+            # IXR3.insert(0, '0' * 16)
+        case 1:
+            # IXR2.insert(0, '0' * 16)
+            # IXR3.insert(0, '0' * 16)
+            IXR1.delete(0, END)
+            IXR1.insert(0, str(decimal_to_binary(cpu.IndexRegisters[0].get_val())))
+        case 2:
+            # IXR1.insert(0, '0' * 16)
+            # IXR3.insert(0, '0' * 16)
+            IXR2.delete(0, END)
+            IXR2.insert(0, str(decimal_to_binary(cpu.IndexRegisters[1].get_val())))
+        case 3:
+            # IXR1.insert(0, '0' * 16)
+            # IXR2.insert(0, '0' * 16)
+            IXR3.delete(0, END)
+            IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
+
+def reset():
+    GPR0.delete(0, END)
+    GPR1.delete(0, END)
+    GPR2.delete(0, END)
+    GPR3.delete(0, END)
     IXR1.delete(0, END)
     IXR2.delete(0, END)
     IXR3.delete(0, END)
-    match index_register:
-        case 0:
-            IXR1.insert(0, '0' * 16)
-            IXR2.insert(0, '0' * 16)
-            IXR3.insert(0, '0' * 16)
-        case 1:
-            IXR2.insert(0, '0' * 16)
-            IXR3.insert(0, '0' * 16)
-            IXR1.insert(0, str(decimal_to_binary(cpu.IndexRegisters[0].get_val())))
-        case 2:
-            IXR1.insert(0, '0' * 16)
-            IXR3.insert(0, '0' * 16)
-            IXR2.insert(0, str(decimal_to_binary(cpu.IndexRegisters[1].get_val())))
-        case 3:
-            IXR1.insert(0, '0' * 16)
-            IXR2.insert(0, '0' * 16)
-            IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
+    PC.delete(0, END)
+    MAR.delete(0, END)
+    MBR.delete(0, END)
+    IR.delete(0, END)
+    MFR.delete(0, END)
+    Privileged.delete(0, END)
 
+    GPR0.insert(0, "0000000000000000")
+    GPR1.insert(0, "0000000000000000")
+    GPR2.insert(0, "0000000000000000")
+    GPR3.insert(0, "0000000000000000")
+    IXR1.insert(0, "0000000000000000")
+    IXR2.insert(0, "0000000000000000")
+    IXR3.insert(0, "0000000000000000")
+    PC.insert(0, "000000000000")
+    MAR.insert(0, "000000000000")
+    MBR.insert(0, "0000000000000000")
+    IR.insert(0, "0000000000000000")
+    MFR.insert(0, "0000")
+    Privileged.insert(0, "0")
 
 # Functions for Load, Store, StorePlus, Run, SS, Init
 def Load():
@@ -654,7 +690,7 @@ def Load():
         num7) + str(num6) + str(num5) + str(num4) + str(num3) + str(num2) + str(num1) + str(num0)
     cpu.IR.set_instruction(binary_string_to_hex(value))
     opcode, operand, index_register, mode, general_register = IR.get_instruction()
-    cpu.run(opcode, operand, index_register, mode, general_register)
+    code = cpu.run(opcode, operand, index_register, mode, general_register)
 
     MAR.delete(0, END)
     MBR.delete(0, END)
@@ -669,7 +705,7 @@ def store():
         num7) + str(num6) + str(num5) + str(num4) + str(num3) + str(num2) + str(num1) + str(num0)
     cpu.IR.set_instruction(binary_string_to_hex(value))
     opcode, operand, index_register, mode, general_register = IR.get_instruction()
-    cpu.run(opcode, operand, index_register, mode, general_register)
+    code = cpu.run(opcode, operand, index_register, mode, general_register)
     MAR.delete(0, END)
     MBR.delete(0, END)
     MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
@@ -687,7 +723,13 @@ def singlestep():
     cpu.MBR.set_val(cpu.Memory.words[addr])
     cpu.IR.set_instruction(cpu.MBR.get_val())
     opcode, operand, index_register, mode, general_register = cpu.IR.decode()
-    cpu.run(opcode, operand, index_register, mode, general_register)
+    code = cpu.run(opcode, operand, index_register, mode, general_register)
+
+    if code == -1:
+        HaltLight.delete(0, END)
+        HaltLight.insert(0, str(1))
+        reset()
+        return
 
     PC.delete(0, END)
     PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
