@@ -118,6 +118,23 @@ class CPU:
             self.MFR.set_val(2)
         return 0
 
+    def run(self, opcode, operand, index_register, mode, general_register):
+        if opcode == 1:
+            self.LDR(operand, index_register, mode, general_register)
+        elif opcode == 2:
+            self.STR(operand, index_register, mode, general_register)
+        elif opcode == 3:
+            self.LDA(operand, index_register, mode, general_register)
+        elif opcode == 33:
+            self.LDX(operand, index_register, mode, general_register)
+        elif opcode == 34:
+            self.STX(operand, index_register, mode, general_register)
+        elif opcode == 0:
+            return self.HALT()
+        # Illegal opcode.
+        else:
+            self.MFR.set_val(2)
+        return 0
 
 def main():
     cpu = CPU(2048)
