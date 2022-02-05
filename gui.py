@@ -658,7 +658,7 @@ def Load():
 
     MAR.delete(0, END)
     MBR.delete(0, END)
-    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val())))
+    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
     show_general_register(general_register)
     show_index_register(index_register)
@@ -672,7 +672,7 @@ def store():
     cpu.run(opcode, operand, index_register, mode, general_register)
     MAR.delete(0, END)
     MBR.delete(0, END)
-    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val())))
+    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
 
 
@@ -689,9 +689,11 @@ def singlestep():
     opcode, operand, index_register, mode, general_register = cpu.IR.decode()
     cpu.run(opcode, operand, index_register, mode, general_register)
 
+    PC.delete(0, END)
+    PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
     MAR.delete(0, END)
     MBR.delete(0, END)
-    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val())))
+    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
     show_general_register(general_register)
     show_index_register(index_register)

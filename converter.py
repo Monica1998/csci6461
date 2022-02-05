@@ -3,8 +3,11 @@ def hex_to_decimal(hex):
     return int(hex, 16)
 
 
-def decimal_to_binary(dec):
-    return '{0:016b}'.format(dec)
+def decimal_to_binary(dec, bit=16):
+    if bit == 16:
+        return '{0:016b}'.format(dec)
+    elif bit == 12:
+        return '{0:012b}'.format(dec)
 
 
 def hex_to_binary(hex):
