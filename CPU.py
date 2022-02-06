@@ -1,13 +1,7 @@
-from ast import Str
-from bdb import effective
-from math import ldexp
 from PC import ProgramCounter as PC
 from registers import MAR, MBR, MFR, IR, IndexRegister, GeneralRegister as GR
 from Memory import Memory
 
-
-# TODO: enforce memory constraints on all registers, PC, etc
-# implement behavior when using idx register and GR to load/store
 
 class CPU:
 
@@ -111,7 +105,6 @@ class CPU:
             return False
         return True
 
-    # TODO: generator for each cycle
     def step(self):
         self.MAR.set_val(self.PC.get_addr())
         self.PC.increment_addr()  # points to next instruction
@@ -140,7 +133,7 @@ class CPU:
             self.MFR.set_val(2)
             return self.HALT()
 
-    def run(self, opcode, operand, index_register, mode, general_register):
+    def single_step(self, opcode, operand, index_register, mode, general_register):
         if opcode == 1:
             return self.LDR(operand, index_register, mode, general_register)
         elif opcode == 2:
@@ -157,6 +150,7 @@ class CPU:
         else:
             self.MFR.set_val(2)
             return self.HALT()
+
 
 def main():
     cpu = CPU(2048)

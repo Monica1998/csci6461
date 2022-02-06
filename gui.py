@@ -627,6 +627,7 @@ def show_index_register(index_register):
             IXR3.delete(0, END)
             IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
 
+
 def reset():
     GPR0.delete(0, END)
     GPR1.delete(0, END)
@@ -657,6 +658,7 @@ def reset():
     Privileged.insert(0, "0")
     cpu.reset()
 
+
 # Functions for Load, Store, StorePlus, Run, SS, Init
 
 def Load():
@@ -675,6 +677,7 @@ def storeplus():
     MAR.delete(0, END)
     MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
 
+
 def singlestep():
     cpu.MAR.set_val(cpu.PC.get_addr())
     cpu.PC.increment_addr()  # points to next instruction
@@ -682,15 +685,13 @@ def singlestep():
     cpu.MBR.set_val(cpu.Memory.words[addr])
     cpu.IR.set_instruction(cpu.MBR.get_val())
     opcode, operand, index_register, mode, general_register = cpu.IR.decode()
-    code = cpu.run(opcode, operand, index_register, mode, general_register)
+    code = cpu.single_step(opcode, operand, index_register, mode, general_register)
 
     if code == -1:
         HaltLight.delete(0, END)
         HaltLight.insert(0, str(1))
         reset()
-        HaltLight.delete(0, END)
-        HaltLight.insert(0, str(0))
-        return
+        return -1
 
     PC.delete(0, END)
     PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
@@ -700,6 +701,14 @@ def singlestep():
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
     show_general_register(general_register)
     show_index_register(index_register)
+    return 0
+
+
+def run():
+    while 1:
+        code = singlestep()
+        if code == -1:
+            return
 
 
 def init():
@@ -726,7 +735,7 @@ StorePlus = Button(frameoperation, text="St+", command=storeplus)
 Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
 SS = Button(framerun, text="SS", command=singlestep)
-Run = Button(framerun, text="Run")
+Run = Button(framerun, text="Run", command=run)
 
 # Initializing Halt and Run Light
 HaltLabel = Label(framerun, text="Halt")
@@ -740,10 +749,10 @@ RunLight.insert(0, "0")
 HaltLight.insert(0, "0")
 
 # Placing Run and Halt labels and lights on the grid
-HaltLabel.grid(row=1, column=4, rowspan=5)
-RunLabel.grid(row=1, column=5, rowspan=5)
-HaltLight.grid(row=3, column=4)
-RunLight.grid(row=3, column=5)
+HaltLabel.grid(row=7, column=4, rowspan=5)
+RunLabel.grid(row=7, column=5, rowspan=5)
+HaltLight.grid(row=1, column=4)
+RunLight.grid(row=1, column=5)
 
 # Placing operarion buttons on the grid
 Store.grid(row=7, column=7)
@@ -753,7 +762,5 @@ Init.grid(row=7, column=10)
 SS.grid(row=1, column=0)
 
 Run.grid(row=1, column=3)
-
-# switch = labeledBitString(16).create(gui, text="Switches:", x=0, y=11, gap=0, toggleAble=True)
 
 gui.mainloop()
