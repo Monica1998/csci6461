@@ -22,7 +22,15 @@ class CPU:
         self.memsize = memsize
         self.Memory = Memory(memsize)
 
-    # TODO: modify to factor in index_register != 0
+    def reset(self):
+        self.PC = PC(0)  # starting addr from IPL.txt
+        self.GRs = [GR() for i in range(4)]
+        self.IndexRegisters = [IndexRegister(0) for i in range(3)]
+        self.MAR = MAR()
+        self.MBR = MBR()
+        self.MFR = MFR()
+        self.IR = IR()
+        self.Memory.words = dict.fromkeys((range(self.memsize)), 0)
 
     def LDR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
@@ -72,8 +80,8 @@ class CPU:
                     self.MAR.set_val(operand)
                     self.MBR.set_val(self.Memory[self.MAR.get_val()])
             else:
-                if self.check_addr(operand + self.IndexRegisters[index_register - 1]):
-                    self.MAR.set_val(operand + self.IndexRegisters[index_register - 1])
+                if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
+                    self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
                     self.MBR.set_val(self.Memory[self.MAR.get_val()])
             return self.MBR.get_val()
         return 0
