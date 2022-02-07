@@ -1,13 +1,7 @@
-from ast import Str
-from bdb import effective
-from math import ldexp
 from PC import ProgramCounter as PC
 from registers import MAR, MBR, MFR, IR, IndexRegister, GeneralRegister as GR
 from Memory import Memory
 
-
-# TODO: enforce memory constraints on all registers, PC, etc
-# implement behavior when using idx register and GR to load/store
 
 class CPU:
 
@@ -34,31 +28,36 @@ class CPU:
 
     def LDR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
-
+        if effective_addr == -1:
+            return self.HALT()
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.GRs[general_register].set_val(self.MBR.get_val())
 
     def STR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
-
+        if effective_addr == -1:
+            return self.HALT()
         self.MBR.set_val(self.GRs[general_register].get_val())
         self.Memory.words[effective_addr] = self.MBR.get_val()
 
     def LDA(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
-
+        if effective_addr == -1:
+            return self.HALT()
         self.GRs[general_register].set_val(effective_addr)
 
     def LDX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
-
+        if effective_addr == -1:
+            return self.HALT()
         self.MBR.set_val(self.Memory.words[effective_addr])
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
 
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
-
+        if effective_addr == -1:
+            return self.HALT()
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
@@ -71,14 +70,21 @@ class CPU:
             if index_register == 0:
                 if self.check_addr(operand):
                     return operand
+                else:
+                    return -1
             else:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     return operand + self.IndexRegisters[index_register - 1].get_val()
+                else:
+                    return -1
         elif mode == 1:
             if index_register == 0:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
                     self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    return self.MAR.get_val()
+                else:
+                    return -1
             else:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
@@ -97,7 +103,6 @@ class CPU:
             return False
         return True
 
-    # TODO: generator for each cycle
     def step(self):
         self.MAR.set_val(self.PC.get_addr())
         self.PC.increment_addr()  # points to next instruction
@@ -110,39 +115,40 @@ class CPU:
         opcode, operand, index_register, mode, general_register = self.IR.decode()
 
         if opcode == 1:
-            self.LDR(operand, index_register, mode, general_register)
+            return self.LDR(operand, index_register, mode, general_register)
         elif opcode == 2:
-            self.STR(operand, index_register, mode, general_register)
+            return self.STR(operand, index_register, mode, general_register)
         elif opcode == 3:
-            self.LDA(operand, index_register, mode, general_register)
+            return self.LDA(operand, index_register, mode, general_register)
         elif opcode == 33:
-            self.LDX(operand, index_register, mode, general_register)
+            return self.LDX(operand, index_register, mode, general_register)
         elif opcode == 34:
-            self.STX(operand, index_register, mode, general_register)
+            return self.STX(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
         else:
             self.MFR.set_val(2)
-        return 0
+            return self.HALT()
 
-    def run(self, opcode, operand, index_register, mode, general_register):
+    def single_step(self, opcode, operand, index_register, mode, general_register):
         if opcode == 1:
-            self.LDR(operand, index_register, mode, general_register)
+            return self.LDR(operand, index_register, mode, general_register)
         elif opcode == 2:
-            self.STR(operand, index_register, mode, general_register)
+            return self.STR(operand, index_register, mode, general_register)
         elif opcode == 3:
-            self.LDA(operand, index_register, mode, general_register)
+            return self.LDA(operand, index_register, mode, general_register)
         elif opcode == 33:
-            self.LDX(operand, index_register, mode, general_register)
+            return self.LDX(operand, index_register, mode, general_register)
         elif opcode == 34:
-            self.STX(operand, index_register, mode, general_register)
+            return self.STX(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
         else:
             self.MFR.set_val(2)
-        return 0
+            return self.HALT()
+
 
 def main():
     cpu = CPU(2048)
