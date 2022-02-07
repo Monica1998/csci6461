@@ -82,7 +82,6 @@ class CPU:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
                     self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
-                    return self.MAR.get_val()
                 else:
                     return -1
             else:

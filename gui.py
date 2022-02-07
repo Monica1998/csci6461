@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 from CPU import *
 from converter import *
@@ -707,6 +708,8 @@ def singlestep():
 def run():
     while 1:
         code = singlestep()
+        gui.update()
+        time.sleep(3)
         if code == -1:
             return
 
