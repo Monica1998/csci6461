@@ -61,7 +61,7 @@ class CPU:
 
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
-        self.Memory[self.MAR.get_val()] = self.MBR.get_val()
+        self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
 
     def HALT(self):
         return -1
@@ -78,11 +78,11 @@ class CPU:
             if index_register == 0:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
-                    self.MBR.set_val(self.Memory[self.MAR.get_val()])
+                    self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
             else:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
-                    self.MBR.set_val(self.Memory[self.MAR.get_val()])
+                    self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
             return self.MBR.get_val()
         return 0
 
@@ -150,7 +150,16 @@ def main():
     cpu.step()
     cpu.step()
     cpu.step()
-
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
 
 if __name__ == '__main__':
     main()
