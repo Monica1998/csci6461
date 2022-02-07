@@ -5,6 +5,7 @@ from Memory import Memory
 
 class CPU:
 
+    #initializes all components, 4 General Registers, 3 Index Registers
     def __init__(self, memsize=2048):
         self.PC = PC(0)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
@@ -16,6 +17,7 @@ class CPU:
         self.memsize = memsize
         self.Memory = Memory(memsize)
 
+    #resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
         self.PC = PC(0)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
@@ -26,6 +28,7 @@ class CPU:
         self.IR = IR()
         self.Memory.words = dict.fromkeys((range(self.memsize)), 0)
 
+    #Load data to general register from effective address
     def LDR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -34,6 +37,7 @@ class CPU:
         self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.GRs[general_register].set_val(self.MBR.get_val())
 
+    #store data from general register to memory
     def STR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -41,12 +45,14 @@ class CPU:
         self.MBR.set_val(self.GRs[general_register].get_val())
         self.Memory.words[effective_addr] = self.MBR.get_val()
 
+    #load effective address into general register
     def LDA(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return self.HALT()
         self.GRs[general_register].set_val(effective_addr)
 
+    #load data into index register
     def LDX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -54,6 +60,7 @@ class CPU:
         self.MBR.set_val(self.Memory.words[effective_addr])
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
 
+    #store data from index register into memory
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -65,6 +72,7 @@ class CPU:
     def HALT(self):
         return -1
 
+    #determines effective address based off of operand, index register, and mode(direct/indirect)
     def get_effective_addr(self, operand, index_register, mode):
         if mode == 0:
             if index_register == 0:
@@ -92,6 +100,7 @@ class CPU:
             return self.MBR.get_val()
         return 0
 
+    #validates effective address does not violae memory constraints
     def check_addr(self, addr):
         # Reserved memory location.
         if 0 <= addr < 6:
@@ -103,6 +112,7 @@ class CPU:
             return False
         return True
 
+    #executes one instruction by fetching instruction address from Program Counter
     def step(self):
         self.MAR.set_val(self.PC.get_addr())
         self.PC.increment_addr()  # points to next instruction
@@ -131,6 +141,7 @@ class CPU:
             self.MFR.set_val(2)
             return self.HALT()
 
+    #function to execute single instruction after being decoded
     def single_step(self, opcode, operand, index_register, mode, general_register):
         if opcode == 1:
             return self.LDR(operand, index_register, mode, general_register)
@@ -149,7 +160,7 @@ class CPU:
             self.MFR.set_val(2)
             return self.HALT()
 
-
+#for testing purposes 
 def main():
     cpu = CPU(2048)
     cpu.Memory.read_mem()

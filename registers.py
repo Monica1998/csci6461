@@ -1,3 +1,4 @@
+#parent register class with getters and setters
 class Register:
 
     def __init__(self, val=0):
@@ -9,19 +10,20 @@ class Register:
     def get_val(self):
         return self.val
 
-
+#Memory Address Register to hold memory address
 class MAR(Register):
     pass
 
 
+#Memory Buffer Register to hold data to/from memory
 class MBR(Register):
     pass
 
-
+#Memory Fault Register
 class MFR(Register):
     pass
 
-
+#Instruction Register to get, set, and decode instructions 
 class IR():
 
     def __init__(self, instruction=None):
@@ -43,7 +45,6 @@ class IR():
         general_register = (self.instruction // 2 ** 6) % 2 ** 2
         return opcode, operand, index_register, mode, general_register
 
-
 class IndexRegister(Register):
     pass
 
@@ -51,7 +52,7 @@ class IndexRegister(Register):
 class GeneralRegister(Register):
     pass
 
-
+#for testing purposes
 def main():
     m = MAR()
     print(m.get_val())
