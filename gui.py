@@ -662,23 +662,24 @@ def reset():
 
 # Functions for Load, Store, StorePlus, Run, SS, Init
 
+#Loads instruction pointed to by MAR and places it into MBR
 def Load():
     cpu.MBR.set_val(cpu.Memory.words[cpu.MAR.get_val()])
     MBR.delete(0, END)
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
 
-
+#gets data from MBR and stores it in addres defined in MAR
 def store():
     cpu.Memory.words[cpu.MAR.get_val()] = cpu.MBR.get_val()
 
-
+#gets data from MBR and stores it in address defined in MAR, then increments MAR to next memory address
 def storeplus():
     cpu.Memory.words[cpu.MAR.get_val()] = cpu.MBR.get_val()
     cpu.MAR.set_val(cpu.MAR.get_val() + 1)
     MAR.delete(0, END)
     MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
 
-
+#fetches address from Program Counter and executes corresponding instruction 
 def singlestep():
     cpu.MAR.set_val(cpu.PC.get_addr())
     cpu.PC.increment_addr()  # points to next instruction
