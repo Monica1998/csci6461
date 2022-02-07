@@ -753,8 +753,8 @@ RunLight.insert(0, "0")
 HaltLight.insert(0, "0")
 
 # Placing Run and Halt labels and lights on the grid
-HaltLabel.grid(row=7, column=4, rowspan=5)
-RunLabel.grid(row=7, column=5, rowspan=5)
+HaltLabel.grid(row=7, column=4)
+RunLabel.grid(row=7, column=5)
 HaltLight.grid(row=1, column=4)
 RunLight.grid(row=1, column=5)
 
