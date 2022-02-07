@@ -96,6 +96,8 @@ class CPU:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
                     self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                else:
+                    return -1
             return self.MBR.get_val()
         return 0
 
