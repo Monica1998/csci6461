@@ -549,7 +549,7 @@ def LD_IXR1():
     IXR1.insert(0, str(num15) + str(num14) + str(num13) + str(num12) + str(num11) + str(num10) + str(num9) + str(
         num8) + str(num7) + str(num6) + str(num5) + str(num4) + str(num3) + str(num2) + str(num1) + str(num0))
     IXR1_num = binary_string_to_decimal(IXR1.get())
-    cpu.IndexRegisters[1].set_val(IXR1_num)
+    cpu.IndexRegisters[0].set_val(IXR1_num)
     print(IXR1.get())
     return
 
@@ -559,7 +559,7 @@ def LD_IXR2():
     IXR2.insert(0, str(num15) + str(num14) + str(num13) + str(num12) + str(num11) + str(num10) + str(num9) + str(
         num8) + str(num7) + str(num6) + str(num5) + str(num4) + str(num3) + str(num2) + str(num1) + str(num0))
     IXR2_num = binary_string_to_decimal(IXR2.get())
-    cpu.IndexRegisters[2].set_val(IXR2_num)
+    cpu.IndexRegisters[1].set_val(IXR2_num)
     print(IXR2.get())
     return
 
@@ -569,7 +569,7 @@ def LD_IXR3():
     IXR3.insert(0, str(num15) + str(num14) + str(num13) + str(num12) + str(num11) + str(num10) + str(num9) + str(
         num8) + str(num7) + str(num6) + str(num5) + str(num4) + str(num3) + str(num2) + str(num1) + str(num0))
     IXR3_num = binary_string_to_decimal(IXR3.get())
-    cpu.IndexRegisters[3].set_val(IXR3_num)
+    cpu.IndexRegisters[2].set_val(IXR3_num)
     print(IXR3.get())
     return
 
