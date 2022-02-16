@@ -665,6 +665,9 @@ def reset():
 
 # Loads instruction pointed to by MAR and places it into MBR
 def Load():
+    filename = fd.askopenfilenames()
+    messagebox.showinfo('file', 'file loaded')
+    Memory.read_mem(filename)
     cpu.MBR.set_val(cpu.Memory.words[cpu.MAR.get_val()])
     MBR.delete(0, END)
     MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
