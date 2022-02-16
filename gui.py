@@ -721,6 +721,9 @@ def run():
 
 def init():
     path = resource_path('IPL.txt')
+    reset()
+    HaltLight.delete(0, END)
+    HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(path)
 
 
