@@ -13,7 +13,7 @@ Excutable files are created on both Mac OS environments:
   - Windows: executable/gui.exe
 
 Initial input for executable files:
-  - "IPL.txt" file (contained in zip) will be fetched to memory when you push 'init' button.
+  - 'Init' button open a filedialog box to load the IPL file 
 
 To run through python:
   - $python3.10 gui.py
