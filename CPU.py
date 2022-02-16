@@ -98,7 +98,10 @@ class CPU:
                     self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
                 else:
                     return -1
-            return self.MBR.get_val()
+            if self.check_addr(self.MBR.get_val()):
+                return self.MBR.get_val()
+            else:
+                return -1
         return 0
 
     #validates effective address does not violae memory constraints
