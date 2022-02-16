@@ -9,7 +9,7 @@ class Memory:
         # self.data = dict()
         self.start = 0
 
-    def read_mem(self, fileName=):
+    def read_mem(self, fileName):
         with open(fileName, 'r') as f:
             lines = f.readlines()
             if len(lines) > self.size:
