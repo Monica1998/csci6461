@@ -8,8 +8,6 @@ Environment:
   - python version: 3.10
 
 Excutable files are created on both Mac OS environments:
-  - Mac m1: executable/gui_m1.exec
-  - Mac intel: executable/gui.exec
   - Windows: executable/gui.exe
 
 Initial input for executable files:
