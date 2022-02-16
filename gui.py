@@ -723,7 +723,6 @@ def run():
 
 def init():
     filename = fd.askopenfilenames()
-    messagebox.showinfo('file', 'file loaded')
     Memory.read_mem(filename)
     path = resource_path('IPL.txt')
     reset()
