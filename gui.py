@@ -723,24 +723,10 @@ def run():
 
 def init():
     filename = fd.askopenfilenames()
-    messagebox.showinfo('file', 'file loaded')
-    Memory.read_mem(filename)
-    path = resource_path('IPL.txt')
     reset()
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
-    cpu.Memory.read_mem(path)
-
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
+    cpu.Memory.read_mem(filename[0])
 
 
 # Place the LD buttons in the grid
