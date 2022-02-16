@@ -3,6 +3,8 @@ import time
 from tkinter import *
 from CPU import *
 from converter import *
+from tkinter import filedialog as fd
+from tkinter import messagebox 
 
 # Initialize Tkinter
 gui = Tk()
