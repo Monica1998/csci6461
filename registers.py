@@ -1,3 +1,6 @@
+from converter import binary_string_to_decimal, decimal_to_binary
+
+
 #parent register class with getters and setters
 class Register:
 
@@ -38,11 +41,22 @@ class IR():
     def decode(self):
         # instruction = hex_to_decimal(self.instruction)
         # process self.instruciton
-        opcode = self.instruction % 2 ** 6
-        operand = self.instruction // 2 ** 11
-        index_register = (self.instruction // 2 ** 8) % 2 ** 2
-        mode = (self.instruction // 2 ** 10) % 2 ** 1
-        general_register = (self.instruction // 2 ** 6) % 2 ** 2
+        bits = decimal_to_binary(self.instruction)
+        s = 0
+        opcode = binary_string_to_decimal(bits[s:s+6])
+        s += 6
+        general_register = binary_string_to_decimal(bits[s:s+2])
+        s += 2
+        index_register = binary_string_to_decimal(bits[s:s+2])
+        s += 2
+        mode = binary_string_to_decimal(bits[s:s+1])
+        s += 1
+        operand = binary_string_to_decimal(bits[s:s+5])
+        #opcode = self.instruction % 2 ** 6
+        #operand = self.instruction // 2 ** 11
+        #index_register = (self.instruction // 2 ** 8) % 2 ** 2
+        #mode = (self.instruction // 2 ** 10) % 2 ** 1
+        #general_register = (self.instruction // 2 ** 6) % 2 ** 2
         return opcode, operand, index_register, mode, general_register
 
 class IndexRegister(Register):
