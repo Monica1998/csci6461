@@ -1,4 +1,4 @@
-from converter import binary_string_to_decimal, decimal_to_binary
+from converter import binary_string_to_decimal, binary_string_to_hex, decimal_to_binary, hex_to_binary, hex_to_decimal
 
 
 #parent register class with getters and setters
@@ -59,6 +59,7 @@ class IR():
         #general_register = (self.instruction // 2 ** 6) % 2 ** 2
         return opcode, operand, index_register, mode, general_register
 
+
 class IndexRegister(Register):
     pass
 
@@ -68,8 +69,31 @@ class GeneralRegister(Register):
 
 #for testing purposes
 def main():
-    m = MAR()
-    print(m.get_val())
+    with open('IPL.txt', 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line.startswith('#'):
+                    continue
+                addr, val = line.split(' ')[:2]
+                val = hex_to_decimal(val)
+                opcode = val % 2 ** 6
+                operand = val // 2 ** 11
+                index_register = (val // 2 ** 8) % 2 ** 2
+                mode = (val // 2 ** 10) % 2 ** 1
+                general_register = (val // 2 ** 6) % 2 ** 2
+
+                opcode_binary = '{0:06b}'.format(opcode)
+                operand_binary = '{0:05b}'.format(operand)
+                index_reg_binary = '{0:02b}'.format(index_register)
+                mode_binary = '{0:01b}'.format(mode)
+                gr_binary = '{0:02b}'.format(general_register)
+
+              #  print('opcode = {}, gr = {}, idx_r = {}, indirect = {}, gr = {}'.format(opcode_binary, gr_binary, index_reg_binary, mode_binary, operand_binary))
+
+                bin_instruction = opcode_binary + gr_binary + index_reg_binary + mode_binary + operand_binary
+                #print('bin_instruction = {}'.format(bin_instruction))
+                hex_res = binary_string_to_hex(bin_instruction)
+                print('hex_res = {}'.format(hex_res))
 
 
 if __name__ == '__main__':

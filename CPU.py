@@ -167,7 +167,7 @@ class CPU:
 #for testing purposes 
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem()
+    cpu.Memory.read_mem('IPL_copy.txt')
     cpu.step()
     cpu.step()
     cpu.step()
