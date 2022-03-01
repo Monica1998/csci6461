@@ -1,4 +1,5 @@
 from PC import ProgramCounter as PC
+from converter import decimal_to_binary, binary_string_to_decimal
 from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as GR
 from Memory import Memory
 
@@ -6,8 +7,6 @@ MAX_VALUE = 2147483647
 MIN_VALUE = -2147483648
 OVERFLOW = 0
 UNDERFLOW = 1
-DIVZERO = 2
-EQUALORNOT = 3
 
 
 class CPU:
@@ -107,9 +106,13 @@ class CPU:
         result = self.GRs[general_register].get_val() - self.MBR.get_val()
         # Check overflow/underflow.
         if self.check_cc(result) == OVERFLOW:
-            self.CC.set_val(OVERFLOW)
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.CC.set_val(binary_string_to_decimal(bits))
         elif self.check_cc(result) == UNDERFLOW:
-            self.CC.set_val(UNDERFLOW)
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.CC.set_val(binary_string_to_decimal(bits))
         else:
             self.GRs[general_register].set_val(result)
 
@@ -124,9 +127,13 @@ class CPU:
             result = self.GRs[general_register].get_val() + operand
             # Check overflow/underflow.
             if self.check_cc(result) == OVERFLOW:
-                self.CC.set_val(OVERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             elif self.check_cc(result) == UNDERFLOW:
-                self.CC.set_val(UNDERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
 
@@ -141,9 +148,13 @@ class CPU:
             result = self.GRs[general_register].get_val() - operand
             # Check overflow/underflow.
             if self.check_cc(result) == OVERFLOW:
-                self.CC.set_val(OVERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             elif self.check_cc(result) == UNDERFLOW:
-                self.CC.set_val(UNDERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
 
@@ -156,34 +167,60 @@ class CPU:
         result = self.GRs[general_register].get_val() * self.GRs[index_register].get_val()
         # Check overflow/underflow.
         if self.check_cc(result) == OVERFLOW:
-            self.CC.set_val(OVERFLOW)
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.CC.set_val(binary_string_to_decimal(bits))
         elif self.check_cc(result) == UNDERFLOW:
-            self.CC.set_val(UNDERFLOW)
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.CC.set_val(binary_string_to_decimal(bits))
         else:
             # Extract the high order bits.
             self.GRs[general_register].set_val(int(result >> 16))
             # Extract the low order bits.
             self.GRs[general_register + 1].set_val(int(result & 0xFFFF))
 
-    # Multiply register by register.
+    # Divide register by register.
     def DVD(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
         if (general_register != 0 and general_register != 2) or \
                 (index_register != 0 and index_register != 2):
             return
+        # Divide by Zero.
         if index_register == 0:
-            self.CC.set_val(DIVZERO)
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:2] + '1' + bits[3:]
+            self.CC.set_val(binary_string_to_decimal(bits))
         else:
             result = self.GRs[general_register].get_val() / self.GRs[index_register].get_val()
             # Check overflow/underflow.
             if self.check_cc(result) == OVERFLOW:
-                self.CC.set_val(OVERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             elif self.check_cc(result) == UNDERFLOW:
-                self.CC.set_val(UNDERFLOW)
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 remainder = self.GRs[general_register].get_val() % self.GRs[index_register].get_val()
                 self.GRs[general_register].set_val(result)
                 self.GRs[general_register + 1].set_val(remainder)
+
+    # Test the equality of register and register.
+    def TRR(self, operand, index_register, mode, general_register):
+        # rx = general_register, ry = index_register
+        if (general_register != 0 and general_register != 2) or \
+                (index_register != 0 and index_register != 2):
+            return
+        if general_register == index_register:
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:3] + '1'
+            self.CC.set_val(binary_string_to_decimal(bits))
+        else:
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:3] + '0'
+            self.CC.set_val(binary_string_to_decimal(bits))
 
     def HALT(self):
         return -1
@@ -224,11 +261,15 @@ class CPU:
     def check_addr(self, addr):
         # Reserved memory location.
         if 0 <= addr < 6:
-            self.MFR.set_val(1)
+            bits = decimal_to_binary(self.MFR.get_val(), bit=4)
+            bits = bits[:3] + '1'
+            self.MFR.set_val(binary_string_to_decimal(bits))
             return False
         # Memory address is beyond the size of memory.
         elif addr >= self.memsize:
-            self.MFR.set_val(3)
+            bits = decimal_to_binary(self.MFR.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.MFR.set_val(binary_string_to_decimal(bits))
             return False
         return True
 
@@ -266,7 +307,9 @@ class CPU:
             return self.HALT()
         # Illegal opcode.
         else:
-            self.MFR.set_val(2)
+            bits = decimal_to_binary(self.MFR.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.MFR.set_val(binary_string_to_decimal(bits))
             return self.HALT()
 
     # function to execute single instruction after being decoded
@@ -285,7 +328,9 @@ class CPU:
             return self.HALT()
         # Illegal opcode.
         else:
-            self.MFR.set_val(2)
+            bits = decimal_to_binary(self.MFR.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.MFR.set_val(binary_string_to_decimal(bits))
             return self.HALT()
 
 
