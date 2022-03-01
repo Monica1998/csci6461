@@ -26,6 +26,10 @@ class MBR(Register):
 class MFR(Register):
     pass
 
+#Condition Code to set when arithmetic/logical operations are executed.
+class CC(Register):
+    pass
+
 #Instruction Register to get, set, and decode instructions 
 class IR():
 

@@ -1,11 +1,18 @@
 from PC import ProgramCounter as PC
-from registers import MAR, MBR, MFR, IR, IndexRegister, GeneralRegister as GR
+from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as GR
 from Memory import Memory
+
+MAX_VALUE = 2147483647
+MIN_VALUE = -2147483648
+OVERFLOW = 0
+UNDERFLOW = 1
+DIVZERO = 2
+EQUALORNOT = 3
 
 
 class CPU:
 
-    #initializes all components, 4 General Registers, 3 Index Registers
+    # initializes all components, 4 General Registers, 3 Index Registers
     def __init__(self, memsize=2048):
         self.PC = PC(0)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
@@ -13,11 +20,12 @@ class CPU:
         self.MAR = MAR()
         self.MBR = MBR()
         self.MFR = MFR()
+        self.CC = CC()
         self.IR = IR()
         self.memsize = memsize
         self.Memory = Memory(memsize)
 
-    #resets all registers and program counter to default values when hitting HALT instruction
+    # resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
         self.PC = PC(0)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
@@ -25,10 +33,11 @@ class CPU:
         self.MAR = MAR()
         self.MBR = MBR()
         self.MFR = MFR()
+        self.CC = CC()
         self.IR = IR()
         self.Memory.words = dict.fromkeys((range(self.memsize)), 0)
 
-    #Load data to general register from effective address
+    # Load data to general register from effective address
     def LDR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -37,7 +46,7 @@ class CPU:
         self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.GRs[general_register].set_val(self.MBR.get_val())
 
-    #store data from general register to memory
+    # store data from general register to memory
     def STR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -45,14 +54,14 @@ class CPU:
         self.MBR.set_val(self.GRs[general_register].get_val())
         self.Memory.words[effective_addr] = self.MBR.get_val()
 
-    #load effective address into general register
+    # load effective address into general register
     def LDA(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return self.HALT()
         self.GRs[general_register].set_val(effective_addr)
 
-    #load data into index register
+    # load data into index register
     def LDX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -60,7 +69,7 @@ class CPU:
         self.MBR.set_val(self.Memory.words[effective_addr])
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
 
-    #store data from index register into memory
+    # store data from index register into memory
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -69,10 +78,117 @@ class CPU:
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
 
+    # Add memory to register.
+    def AMR(self, operand, index_register, mode, general_register):
+        # immed = operand
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return self.HALT()
+        self.MAR.set_val(effective_addr)
+
+        # TODO: fetch from cache(self.MAR.get_val())
+        self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+
+        result = self.GRs[general_register].get_val() + self.MBR.get_val()
+        # Check overflow.
+        if MIN_VALUE <= result <= MAX_VALUE:
+            self.GRs[general_register].set_val(result)
+
+    # Subtract memory from register.
+    def SMR(self, operand, index_register, mode, general_register):
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return self.HALT()
+        self.MAR.set_val(effective_addr)
+
+        # TODO: fetch from cache(self.MAR.get_val())
+        self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+
+        result = self.GRs[general_register].get_val() - self.MBR.get_val()
+        # Check overflow/underflow.
+        if self.check_cc(result) == OVERFLOW:
+            self.CC.set_val(OVERFLOW)
+        elif self.check_cc(result) == UNDERFLOW:
+            self.CC.set_val(UNDERFLOW)
+        else:
+            self.GRs[general_register].set_val(result)
+
+    # Add immediate to register.
+    def AIR(self, operand, index_register, mode, general_register):
+        # immed = operand
+        if operand == 0:
+            return
+        if general_register == 0:
+            self.GRs[general_register].set_val(operand)
+        else:
+            result = self.GRs[general_register].get_val() + operand
+            # Check overflow/underflow.
+            if self.check_cc(result) == OVERFLOW:
+                self.CC.set_val(OVERFLOW)
+            elif self.check_cc(result) == UNDERFLOW:
+                self.CC.set_val(UNDERFLOW)
+            else:
+                self.GRs[general_register].set_val(result)
+
+    # Subtract immediate from register.
+    def SIR(self, operand, index_register, mode, general_register):
+        # immed = operand
+        if operand == 0:
+            return
+        if general_register == 0:
+            self.GRs[1].set_val(-1 * operand)
+        else:
+            result = self.GRs[general_register].get_val() - operand
+            # Check overflow/underflow.
+            if self.check_cc(result) == OVERFLOW:
+                self.CC.set_val(OVERFLOW)
+            elif self.check_cc(result) == UNDERFLOW:
+                self.CC.set_val(UNDERFLOW)
+            else:
+                self.GRs[general_register].set_val(result)
+
+    # Multiply register by register.
+    def MLT(self, operand, index_register, mode, general_register):
+        # rx = general_register, ry = index_register
+        if (general_register != 0 and general_register != 2) or \
+                (index_register != 0 and index_register != 2):
+            return
+        result = self.GRs[general_register].get_val() * self.GRs[index_register].get_val()
+        # Check overflow/underflow.
+        if self.check_cc(result) == OVERFLOW:
+            self.CC.set_val(OVERFLOW)
+        elif self.check_cc(result) == UNDERFLOW:
+            self.CC.set_val(UNDERFLOW)
+        else:
+            # Extract the high order bits.
+            self.GRs[general_register].set_val(int(result >> 16))
+            # Extract the low order bits.
+            self.GRs[general_register + 1].set_val(int(result & 0xFFFF))
+
+    # Multiply register by register.
+    def DVD(self, operand, index_register, mode, general_register):
+        # rx = general_register, ry = index_register
+        if (general_register != 0 and general_register != 2) or \
+                (index_register != 0 and index_register != 2):
+            return
+        if index_register == 0:
+            self.CC.set_val(DIVZERO)
+        else:
+            result = self.GRs[general_register].get_val() / self.GRs[index_register].get_val()
+            # Check overflow/underflow.
+            if self.check_cc(result) == OVERFLOW:
+                self.CC.set_val(OVERFLOW)
+            elif self.check_cc(result) == UNDERFLOW:
+                self.CC.set_val(UNDERFLOW)
+            else:
+                remainder = self.GRs[general_register].get_val() % self.GRs[index_register].get_val()
+                self.GRs[general_register].set_val(result)
+                self.GRs[general_register + 1].set_val(remainder)
+
     def HALT(self):
         return -1
 
-    #determines effective address based off of operand, index register, and mode(direct/indirect)
+    # determines effective address based off of operand, index register, and mode(direct/indirect)
     def get_effective_addr(self, operand, index_register, mode):
         if mode == 0:
             if index_register == 0:
@@ -104,7 +220,7 @@ class CPU:
                 return -1
         return 0
 
-    #validates effective address does not violae memory constraints
+    # validates effective address does not violate memory constraints
     def check_addr(self, addr):
         # Reserved memory location.
         if 0 <= addr < 6:
@@ -116,7 +232,15 @@ class CPU:
             return False
         return True
 
-    #executes one instruction by fetching instruction address from Program Counter
+    # check
+    def check_cc(self, num):
+        if num > MAX_VALUE:
+            return OVERFLOW
+        elif num < MIN_VALUE:
+            return UNDERFLOW
+        return -1
+
+    # executes one instruction by fetching instruction address from Program Counter
     def step(self):
         self.MAR.set_val(self.PC.get_addr())
         self.PC.increment_addr()  # points to next instruction
@@ -145,7 +269,7 @@ class CPU:
             self.MFR.set_val(2)
             return self.HALT()
 
-    #function to execute single instruction after being decoded
+    # function to execute single instruction after being decoded
     def single_step(self, opcode, operand, index_register, mode, general_register):
         if opcode == 1:
             return self.LDR(operand, index_register, mode, general_register)
@@ -164,10 +288,11 @@ class CPU:
             self.MFR.set_val(2)
             return self.HALT()
 
-#for testing purposes 
+
+# for testing purposes
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem('IPL_copy.txt')
+    cpu.Memory.read_mem('IPL.txt')
     cpu.step()
     cpu.step()
     cpu.step()
@@ -181,6 +306,7 @@ def main():
     cpu.step()
     cpu.step()
     cpu.step()
+
 
 if __name__ == '__main__':
     main()
