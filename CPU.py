@@ -40,7 +40,7 @@ class CPU:
     def LDR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.GRs[general_register].set_val(self.MBR.get_val())
@@ -49,7 +49,7 @@ class CPU:
     def STR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MBR.set_val(self.GRs[general_register].get_val())
         self.Memory.words[effective_addr] = self.MBR.get_val()
 
@@ -57,14 +57,14 @@ class CPU:
     def LDA(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.GRs[general_register].set_val(effective_addr)
 
     # load data into index register
     def LDX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MBR.set_val(self.Memory.words[effective_addr])
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
 
@@ -72,7 +72,7 @@ class CPU:
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
@@ -82,7 +82,7 @@ class CPU:
         # immed = operand
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
@@ -97,7 +97,7 @@ class CPU:
     def SMR(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return self.HALT()
+            return
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
@@ -222,6 +222,56 @@ class CPU:
             bits = bits[:3] + '0'
             self.CC.set_val(binary_string_to_decimal(bits))
 
+    # Logical And of register and register
+    def AND(self, operand, index_register, mode, general_register):
+        # rx = general_register, ry = index_register
+        self.GRs[general_register].set_val(general_register & index_register)
+
+    # Logical Or of register and register
+    def ORR(self, operand, index_register, mode, general_register):
+        # rx = general_register, ry = index_register
+        self.GRs[general_register].set_val(general_register | index_register)
+
+    # Logical Not of register and register
+    def NOT(self, operand, index_register, mode, general_register):
+        # rx = general_register
+        self.GRs[general_register].set_val(~general_register)
+
+    # Shift register by count
+    def SRC(self, operand, index_register, mode, general_register):
+        # A_L = index_register 1st bit, L_R = index_register 2nd bit, Count = operand
+        A_L = decimal_to_binary(index_register, 2)[0]
+        L_R = decimal_to_binary(index_register, 2)[1]
+        if A_L == 0:
+            if L_R == 0:
+                self.GRs[general_register].set_val(self.GRs[general_register].get_val() >> operand)
+            elif L_R == 1:
+                self.GRs[general_register].set_val(self.GRs[general_register].get_val() << operand)
+        elif A_L == 1:
+            if L_R == 0:
+                if self.GRs[general_register].get_val() >= 0:
+                    self.GRs[general_register].set_val(self.rshift(self.GRs[general_register].get_val(), operand))
+                else:
+                    tmp = decimal_to_binary(self.rshift(self.GRs[general_register].get_val(), operand))
+                    tmp = tmp.replace("1111111111111111", "")
+                    self.GRs[general_register].set_val(binary_string_to_decimal(tmp))
+            elif L_R == 1:
+                self.GRs[general_register].set_val(self.GRs[general_register].get_val() << operand)
+
+    # Rotate register by count
+    def RRC(self, operand, index_register, mode, general_register):
+        # L_R = index_register 2nd bit, Count = operand
+        L_R = decimal_to_binary(index_register, 2)[1]
+        bits = decimal_to_binary(self.GRs[general_register].get_val())
+        bits = bits.replace("0000000000000000", "")
+        if self.GRs[general_register].get_val() < 0:
+            bits = bits.replace("1111111111111111", "")
+        if L_R == 1:
+            self.GRs[general_register].set_val(binary_string_to_decimal(bits[operand:] + bits[:operand]))
+        elif L_R == 0:
+            self.GRs[general_register].set_val(binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
+
+
     def HALT(self):
         return -1
 
@@ -273,13 +323,16 @@ class CPU:
             return False
         return True
 
-    # check
+    # check overflow and underflow.
     def check_cc(self, num):
         if num > MAX_VALUE:
             return OVERFLOW
         elif num < MIN_VALUE:
             return UNDERFLOW
         return -1
+
+    def rshift(self, val, n):
+        return val >> n if val >= 0 else (val + 0x100000000) >> n
 
     # executes one instruction by fetching instruction address from Program Counter
     def step(self):
@@ -303,6 +356,30 @@ class CPU:
             return self.LDX(operand, index_register, mode, general_register)
         elif opcode == 34:
             return self.STX(operand, index_register, mode, general_register)
+        elif opcode == 4:
+            return self.AMR(operand, index_register, mode, general_register)
+        elif opcode == 5:
+            return self.SMR(operand, index_register, mode, general_register)
+        elif opcode == 6:
+            return self.AIR(operand, index_register, mode, general_register)
+        elif opcode == 7:
+            return self.SIR(operand, index_register, mode, general_register)
+        elif opcode == 16:
+            return self.MLT(operand, index_register, mode, general_register)
+        elif opcode == 17:
+            return self.DVD(operand, index_register, mode, general_register)
+        elif opcode == 18:
+            return self.TRR(operand, index_register, mode, general_register)
+        elif opcode == 19:
+            return self.AND(operand, index_register, mode, general_register)
+        elif opcode == 20:
+            return self.ORR(operand, index_register, mode, general_register)
+        elif opcode == 21:
+            return self.NOT(operand, index_register, mode, general_register)
+        elif opcode == 25:
+            return self.SRC(operand, index_register, mode, general_register)
+        elif opcode == 26:
+            return self.RRC(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
@@ -310,7 +387,7 @@ class CPU:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:1] + '1' + bits[2:]
             self.MFR.set_val(binary_string_to_decimal(bits))
-            return self.HALT()
+            #return self.HALT()
 
     # function to execute single instruction after being decoded
     def single_step(self, opcode, operand, index_register, mode, general_register):
@@ -324,6 +401,30 @@ class CPU:
             return self.LDX(operand, index_register, mode, general_register)
         elif opcode == 34:
             return self.STX(operand, index_register, mode, general_register)
+        elif opcode == 4:
+            return self.AMR(operand, index_register, mode, general_register)
+        elif opcode == 5:
+            return self.SMR(operand, index_register, mode, general_register)
+        elif opcode == 6:
+            return self.AIR(operand, index_register, mode, general_register)
+        elif opcode == 7:
+            return self.SIR(operand, index_register, mode, general_register)
+        elif opcode == 16:
+            return self.MLT(operand, index_register, mode, general_register)
+        elif opcode == 17:
+            return self.DVD(operand, index_register, mode, general_register)
+        elif opcode == 18:
+            return self.TRR(operand, index_register, mode, general_register)
+        elif opcode == 19:
+            return self.AND(operand, index_register, mode, general_register)
+        elif opcode == 20:
+            return self.ORR(operand, index_register, mode, general_register)
+        elif opcode == 21:
+            return self.NOT(operand, index_register, mode, general_register)
+        elif opcode == 25:
+            return self.SRC(operand, index_register, mode, general_register)
+        elif opcode == 26:
+            return self.RRC(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
@@ -331,7 +432,7 @@ class CPU:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:1] + '1' + bits[2:]
             self.MFR.set_val(binary_string_to_decimal(bits))
-            return self.HALT()
+            #return self.HALT()
 
 
 # for testing purposes

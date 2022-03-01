@@ -10,6 +10,8 @@ def decimal_to_binary(dec, bit=16):
         return '{0:012b}'.format(dec)
     elif bit == 4:
         return '{0:004b}'.format(dec)
+    elif bit == 2:
+        return '{0:002b}'.format(dec)
 
 
 def hex_to_binary(hex):
