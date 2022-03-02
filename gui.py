@@ -5,6 +5,7 @@ from CPU import *
 from converter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox 
+# import cachew
 
 # Initialize Tkinter
 gui = Tk()
@@ -42,6 +43,8 @@ MBRLabel = Label(gui, text="MBR(16bits)").grid(row=2, column=5)
 IRLabel = Label(gui, text="IR(16bits)").grid(row=3, column=5)
 MFRLabel = Label(gui, text="MFR(4bits)").grid(row=4, column=5)
 PrivilegedLabel = Label(gui, text="Privileged(1bits)").grid(row=5, column=5)
+KeyboardLabel = Label(gui, text="Keyboard").grid(row=6, column=5)
+PrinterLabel = Label(gui, text="Printer").grid(row=7, column=5)
 
 # Initialize Switch Values to 0
 num15: int = 0
@@ -471,6 +474,8 @@ MBR = Entry(gui, width=30, borderwidth=5)
 IR = Entry(gui, width=30, borderwidth=5)
 MFR = Entry(gui, width=30, borderwidth=5)
 Privileged = Entry(gui, width=30, borderwidth=5)
+Keyboard = Entry(gui, width=30, borderwidth=5)
+Printer = Entry(gui, width=30, borderwidth=5)
 
 # Initialize register values
 GPR0.insert(0, "0000000000000000")
@@ -486,6 +491,8 @@ MBR.insert(0, "0000000000000000")
 IR.insert(0, "0000000000000000")
 MFR.insert(0, "0000")
 Privileged.insert(0, "0")
+Keyboard.insert(0, "")
+Printer.insert(0, "")
 
 # Placing Register textboxes
 GPR0.grid(row=0, column=1)
@@ -503,6 +510,8 @@ MBR.grid(row=2, column=6)
 IR.grid(row=3, column=6)
 MFR.grid(row=4, column=6)
 Privileged.grid(row=5, column=6)
+Keyboard.grid(row=6, column=6)
+Printer.grid(row=7, column=6)
 
 
 # LD function for each register
@@ -600,6 +609,8 @@ def LD_MBR():
     cpu.MBR.set_val(binary_string_to_decimal(MBR.get()))
     return
 
+def LD_KB():
+    pass
 
 def show_general_register(general_register):
     match general_register:
@@ -742,6 +753,10 @@ IXR3_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_IXR3).grid(row=7, co
 PC_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_PC).grid(row=0, column=7)
 MAR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MAR).grid(row=1, column=7)
 MBR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MBR).grid(row=2, column=7)
+KB_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_KB).grid(row=6, column=7)
+
+def cache():
+    pass
 
 # Initializing operation buttons
 Store = Button(frameoperation, text="Store", command=store)
@@ -750,6 +765,7 @@ Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
 SS = Button(framerun, text="SS", command=singlestep)
 Run = Button(framerun, text="Run", command=run)
+Cache = Button(framerun, text="Cache", command=cache)
 
 # Initializing Halt and Run Light
 HaltLabel = Label(framerun, text="Halt")
@@ -776,5 +792,6 @@ Init.grid(row=7, column=10)
 SS.grid(row=1, column=0)
 
 Run.grid(row=1, column=3)
+Cache.grid(row=1, column=7)
 
 gui.mainloop()
