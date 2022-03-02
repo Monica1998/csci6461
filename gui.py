@@ -726,8 +726,10 @@ def singlestep():
         MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
         show_general_register(general_register)
         show_index_register(index_register)
-        if cpu.Device.get_printer() is not None:
+        Printer.delete(0, END)
+        if opcode == 50:
             Printer.insert(0, str(cpu.Device.get_printer()))
+
     # Fault situation - TODO: handle each fault situation rather than HALT() the program (prj3).
     else:
         PC.delete(0, END)
@@ -740,6 +742,7 @@ def singlestep():
         MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
         show_general_register(general_register)
         show_index_register(index_register)
+        Printer.delete(0, END)
     return 0
 
 

@@ -1,6 +1,6 @@
 class Device:
 
-    def __init__(self, val=0):
+    def __init__(self):
         self.printer = 0
         self.keyboard = list()
 
@@ -8,7 +8,8 @@ class Device:
         self.keyboard.append(val)
 
     def get_keyboard(self):
-        return self.keyboard.pop(0)
+        if len(self.keyboard) != 0:
+            return self.keyboard.pop(0)
 
     def set_printer(self, val):
         self.printer = val
