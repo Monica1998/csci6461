@@ -1,3 +1,4 @@
+from Device import Device
 from PC import ProgramCounter as PC
 from converter import decimal_to_binary, binary_string_to_decimal
 from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as GR
@@ -23,6 +24,7 @@ class CPU:
         self.IR = IR()
         self.memsize = memsize
         self.Memory = Memory(memsize)
+        self.Device = Device()
 
     # resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
@@ -34,6 +36,7 @@ class CPU:
         self.MFR = MFR()
         self.CC = CC()
         self.IR = IR()
+        self.Device = Device()
         self.Memory.words = dict.fromkeys((range(self.memsize)), 0)
 
     # Load data to general register from effective address
@@ -86,9 +89,9 @@ class CPU:
     def JZ(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
-            return  
+            return
         self.MAR.set_val(effective_addr)
-        if (self.GRs[general_register].get_val() == 0):
+        if self.GRs[general_register].get_val() == 0:
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
@@ -99,7 +102,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        if (self.GRs[general_register].get_val() != 0):
+        if self.GRs[general_register].get_val() != 0:
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
@@ -110,7 +113,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        if (cc == 1):
+        if cc == 1:
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
@@ -142,8 +145,8 @@ class CPU:
         self.MAR.set_val(effective_addr)
         self.GRs[general_register(0)].set_val(operand)
         self.PC.set_addr(self.GRs[general_register(3)].get_val())
-        #IX, I fields are ignored
-       
+        # IX, I fields are ignored
+
     # Subtract One and Branch
     def SOB(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
@@ -157,7 +160,6 @@ class CPU:
         else:
             PC.increment_addr()
 
-
     # Jump Greater than or equal to
     def JGE(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
@@ -168,7 +170,6 @@ class CPU:
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
-
 
     # Add memory to register.
     def AMR(self, operand, index_register, mode, general_register):
@@ -373,7 +374,26 @@ class CPU:
         if L_R == 1:
             self.GRs[general_register].set_val(binary_string_to_decimal(bits[operand:] + bits[:operand]))
         elif L_R == 0:
-            self.GRs[general_register].set_val(binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
+            self.GRs[general_register].set_val(
+                binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
+        self.PC.increment_addr()
+
+    def IN(self, operand, index_register, mode, general_register):
+        # devid = operand
+        if operand == 0:  # Console Keyboard
+            self.GRs[general_register].set_val(self.Device.get_keyboard())
+        elif operand == 2:  # Card Reader
+            pass
+        else:
+            pass
+        self.PC.increment_addr()
+
+    def OUT(self, operand, index_register, mode, general_register):
+        # devid = operand
+        if operand == 1:  # Console Printer
+            self.Device.set_printer(self.GRs[general_register].get_val())
+        else:
+            pass
         self.PC.increment_addr()
 
     def HALT(self):
@@ -483,7 +503,7 @@ class CPU:
         elif opcode == 14:
             return self.JGE(operand, index_register, mode, general_register)
         elif opcode == 15:
-            return self.SIR(operand, index_register, mode, general_register)    
+            return self.SIR(operand, index_register, mode, general_register)
         elif opcode == 16:
             return self.MLT(operand, index_register, mode, general_register)
         elif opcode == 17:
@@ -507,7 +527,7 @@ class CPU:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:1] + '1' + bits[2:]
             self.MFR.set_val(binary_string_to_decimal(bits))
-            #return self.HALT()
+            # return self.HALT()
 
     # function to execute single instruction after being decoded
     def single_step(self, opcode, operand, index_register, mode, general_register):
@@ -546,7 +566,7 @@ class CPU:
         elif opcode == 14:
             return self.JGE(operand, index_register, mode, general_register)
         elif opcode == 15:
-            return self.SIR(operand, index_register, mode, general_register)            
+            return self.SIR(operand, index_register, mode, general_register)
         elif opcode == 16:
             return self.MLT(operand, index_register, mode, general_register)
         elif opcode == 17:
@@ -563,6 +583,10 @@ class CPU:
             return self.SRC(operand, index_register, mode, general_register)
         elif opcode == 26:
             return self.RRC(operand, index_register, mode, general_register)
+        elif opcode == 49:
+            return self.IN(operand, index_register, mode, general_register)
+        elif opcode == 50:
+            return self.OUT(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
@@ -570,7 +594,7 @@ class CPU:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:1] + '1' + bits[2:]
             self.MFR.set_val(binary_string_to_decimal(bits))
-            #return self.HALT()
+            # return self.HALT()
 
 
 # for testing purposes

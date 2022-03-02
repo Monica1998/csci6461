@@ -4,7 +4,7 @@ from tkinter import *
 from CPU import *
 from converter import *
 from tkinter import filedialog as fd
-from tkinter import messagebox 
+from tkinter import messagebox
 # import cachew
 
 # Initialize Tkinter
@@ -610,7 +610,8 @@ def LD_MBR():
     return
 
 def LD_KB():
-    pass
+    cpu.Device.set_keyboard(Keyboard.get())
+    return
 
 def show_general_register(general_register):
     match general_register:
@@ -706,20 +707,39 @@ def singlestep():
     opcode, operand, index_register, mode, general_register = cpu.IR.decode()
     code = cpu.single_step(opcode, operand, index_register, mode, general_register)
 
+    # HALT
     if code == -1:
         HaltLight.delete(0, END)
         HaltLight.insert(0, str(1))
         reset()
         return -1
 
-    PC.delete(0, END)
-    PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
-    MAR.delete(0, END)
-    MBR.delete(0, END)
-    MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
-    MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
-    show_general_register(general_register)
-    show_index_register(index_register)
+    # Normal instruction.
+    if cpu.MFR.get_val() == 0:
+        PC.delete(0, END)
+        PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
+        MAR.delete(0, END)
+        MBR.delete(0, END)
+        MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
+        MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
+        MFR.delete(0, END)
+        MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
+        show_general_register(general_register)
+        show_index_register(index_register)
+        if cpu.Device.get_printer() is not None:
+            Printer.insert(0, str(cpu.Device.get_printer()))
+    # Fault situation - TODO: handle each fault situation rather than HALT() the program (prj3).
+    else:
+        PC.delete(0, END)
+        PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
+        MAR.delete(0, END)
+        MBR.delete(0, END)
+        MAR.insert(0, str(decimal_to_binary(cpu.MAR.get_val(), 12)))
+        MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
+        MFR.delete(0, END)
+        MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
+        show_general_register(general_register)
+        show_index_register(index_register)
     return 0
 
 
