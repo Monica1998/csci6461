@@ -4,8 +4,8 @@ from tkinter import *
 from CPU import *
 from converter import *
 from tkinter import filedialog as fd
-from tkinter import messagebox
-# import cachew
+from tkinter import messagebox 
+import cachew
 
 # Initialize Tkinter
 gui = Tk()
@@ -776,7 +776,7 @@ MBR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MBR).grid(row=2, colu
 KB_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_KB).grid(row=6, column=7)
 
 def cache():
-    pass
+    cachew.open()
 
 # Initializing operation buttons
 Store = Button(frameoperation, text="Store", command=store)
