@@ -44,7 +44,7 @@ class CPU:
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.GRs[general_register].set_val(self.MBR.get_val())
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # store data from general register to memory
     def STR(self, operand, index_register, mode, general_register):
@@ -53,7 +53,7 @@ class CPU:
             return
         self.MBR.set_val(self.GRs[general_register].get_val())
         self.Memory.words[effective_addr] = self.MBR.get_val()
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # load effective address into general register
     def LDA(self, operand, index_register, mode, general_register):
@@ -61,7 +61,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.GRs[general_register].set_val(effective_addr)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # load data into index register
     def LDX(self, operand, index_register, mode, general_register):
@@ -70,7 +70,7 @@ class CPU:
             return
         self.MBR.set_val(self.Memory.words[effective_addr])
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # store data from index register into memory
     def STX(self, operand, index_register, mode, general_register):
@@ -80,7 +80,7 @@ class CPU:
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Jump if Equal
     def JZ(self, operand, index_register, mode, general_register):
@@ -91,7 +91,7 @@ class CPU:
         if (self.GRs[general_register].get_val() == 0):
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Jump If Not Equal
     def JNE(self, operand, index_register, mode, general_register):
@@ -102,7 +102,7 @@ class CPU:
         if (self.GRs[general_register].get_val() != 0):
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Jump If Condition Code
     def JCC(self, operand, index_register, mode, cc):
@@ -113,7 +113,7 @@ class CPU:
         if (cc == 1):
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Unconditional Jump To Address
     def JMA(self, operand, index_register, mode, general_register):
@@ -167,7 +167,7 @@ class CPU:
         if (self.GRs[general_register].get_val() >= 0):
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr()
+            self.PC.increment_addr()
 
 
     # Add memory to register.
@@ -185,7 +185,7 @@ class CPU:
         # Check overflow.
         if MIN_VALUE <= result <= MAX_VALUE:
             self.GRs[general_register].set_val(result)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Subtract memory from register.
     def SMR(self, operand, index_register, mode, general_register):
@@ -209,7 +209,7 @@ class CPU:
             self.CC.set_val(binary_string_to_decimal(bits))
         else:
             self.GRs[general_register].set_val(result)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Add immediate to register.
     def AIR(self, operand, index_register, mode, general_register):
@@ -231,7 +231,7 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Subtract immediate from register.
     def SIR(self, operand, index_register, mode, general_register):
@@ -253,7 +253,7 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Multiply register by register.
     def MLT(self, operand, index_register, mode, general_register):
@@ -276,7 +276,7 @@ class CPU:
             self.GRs[general_register].set_val(int(result >> 16))
             # Extract the low order bits.
             self.GRs[general_register + 1].set_val(int(result & 0xFFFF))
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Divide register by register.
     def DVD(self, operand, index_register, mode, general_register):
@@ -304,7 +304,7 @@ class CPU:
                 remainder = self.GRs[general_register].get_val() % self.GRs[index_register].get_val()
                 self.GRs[general_register].set_val(result)
                 self.GRs[general_register + 1].set_val(remainder)
-            PC.increment_addr()
+            self.PC.increment_addr()
 
     # Test the equality of register and register.
     def TRR(self, operand, index_register, mode, general_register):
@@ -320,25 +320,25 @@ class CPU:
             bits = decimal_to_binary(self.CC.get_val(), bit=4)
             bits = bits[:3] + '0'
             self.CC.set_val(binary_string_to_decimal(bits))
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Logical And of register and register
     def AND(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
         self.GRs[general_register].set_val(general_register & index_register)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Logical Or of register and register
     def ORR(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
         self.GRs[general_register].set_val(general_register | index_register)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Logical Not of register and register
     def NOT(self, operand, index_register, mode, general_register):
         # rx = general_register
         self.GRs[general_register].set_val(~general_register)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Shift register by count
     def SRC(self, operand, index_register, mode, general_register):
@@ -360,7 +360,7 @@ class CPU:
                     self.GRs[general_register].set_val(binary_string_to_decimal(tmp))
             elif L_R == 1:
                 self.GRs[general_register].set_val(self.GRs[general_register].get_val() << operand)
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     # Rotate register by count
     def RRC(self, operand, index_register, mode, general_register):
@@ -374,7 +374,7 @@ class CPU:
             self.GRs[general_register].set_val(binary_string_to_decimal(bits[operand:] + bits[:operand]))
         elif L_R == 0:
             self.GRs[general_register].set_val(binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
-        PC.increment_addr()
+        self.PC.increment_addr()
 
     def HALT(self):
         return -1
