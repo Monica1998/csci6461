@@ -688,7 +688,7 @@ def storeplus():
 # fetches address from Program Counter and executes corresponding instruction
 def singlestep():
     cpu.MAR.set_val(cpu.PC.get_addr())
-    cpu.PC.increment_addr()  # points to next instruction
+    # cpu.PC.increment_addr()  # points to next instruction
     addr = cpu.MAR.get_val()
     cpu.MBR.set_val(cpu.Memory.words[addr])
     cpu.IR.set_instruction(cpu.MBR.get_val())
