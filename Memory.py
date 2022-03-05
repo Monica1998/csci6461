@@ -29,7 +29,8 @@ class Memory:
 
 # for testing purposes
 def main():
-    print('{0:016b}'.format(6))
+    m = Memory()
+    print(len(m.words))
 
 
 if __name__ == '__main__':

@@ -58,7 +58,8 @@ class CPU:
         if effective_addr == -1:
             return
         self.MBR.set_val(self.GRs[general_register].get_val())
-        self.Memory.words[effective_addr] = self.MBR.get_val()
+        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        self.Cache.set_word(effective_addr, self.MBR.get_val())
         self.PC.increment_addr()
 
     # load effective address into general register
@@ -628,7 +629,7 @@ class CPU:
 # for testing purposes
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem('IPL.txt')
+    cpu.Memory.read_mem('IPL_part2.txt')
     cpu.step()
     cpu.step()
     cpu.step()
