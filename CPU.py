@@ -3,6 +3,7 @@ from PC import ProgramCounter as PC
 from converter import decimal_to_binary, binary_string_to_decimal
 from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as GR
 from Memory import Memory
+from cache import Cache
 
 MAX_VALUE = 2147483647
 MIN_VALUE = -2147483648
@@ -24,6 +25,7 @@ class CPU:
         self.IR = IR()
         self.memsize = memsize
         self.Memory = Memory(memsize)
+        self.Cache = Cache(self.Memory)
         self.Device = Device()
 
     # resets all registers and program counter to default values when hitting HALT instruction
@@ -38,6 +40,7 @@ class CPU:
         self.IR = IR()
         self.Device = Device()
         self.Memory.words = dict.fromkeys((range(self.memsize)), 0)
+        self.Cache.clear_cache()
 
     # Load data to general register from effective address
     def LDR(self, operand, index_register, mode, general_register):
@@ -45,9 +48,9 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         self.GRs[general_register].set_val(self.MBR.get_val())
-        self.PC.increment_addr()
+       # self.PC.increment_addr()
 
     # store data from general register to memory
     def STR(self, operand, index_register, mode, general_register):
@@ -55,8 +58,9 @@ class CPU:
         if effective_addr == -1:
             return
         self.MBR.set_val(self.GRs[general_register].get_val())
-        self.Memory.words[effective_addr] = self.MBR.get_val()
-        self.PC.increment_addr()
+        self.Cache.set_word(effective_addr, self.MBR.get_val())
+        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        #self.PC.increment_addr()
 
     # load effective address into general register
     def LDA(self, operand, index_register, mode, general_register):
@@ -64,14 +68,15 @@ class CPU:
         if effective_addr == -1:
             return
         self.GRs[general_register].set_val(effective_addr)
-        self.PC.increment_addr()
+        #self.PC.increment_addr()
 
     # load data into index register
     def LDX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
-        self.MBR.set_val(self.Memory.words[effective_addr])
+        #self.MBR.set_val(self.Memory.words[effective_addr])
+        self.MBR.set_val(self.Cache.get_word(effective_addr))
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
         self.PC.increment_addr()
 
@@ -82,8 +87,9 @@ class CPU:
             return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
-        self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
-        self.PC.increment_addr()
+        #self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
+        self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
+        #self.PC.increment_addr()
 
     # Jump if Equal
     def JZ(self, operand, index_register, mode, general_register):
@@ -158,7 +164,7 @@ class CPU:
         if (self.GRs[general_register].get_val() > 0):
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr()
+            PC.increment_addr() #PC = 2
 
     # Jump Greater than or equal to
     def JGE(self, operand, index_register, mode, general_register):
@@ -180,7 +186,8 @@ class CPU:
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
-        self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
 
         result = self.GRs[general_register].get_val() + self.MBR.get_val()
         # Check overflow.
@@ -196,7 +203,8 @@ class CPU:
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
-        self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
 
         result = self.GRs[general_register].get_val() - self.MBR.get_val()
         # Check overflow/underflow.
@@ -378,11 +386,11 @@ class CPU:
                 binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
         self.PC.increment_addr()
 
-    def IN(self, operand, index_register, mode, general_register):
+    def IN(self, dev_id, index_register, mode, general_register):
         # devid = operand
-        if operand == 0:  # Console Keyboard
+        if dev_id == 0:  # Console Keyboard
             self.GRs[general_register].set_val(self.Device.get_keyboard())
-        elif operand == 2:  # Card Reader
+        elif dev_id == 2:  # Card Reader
             pass
         else:
             pass
@@ -416,13 +424,15 @@ class CPU:
             if index_register == 0:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
-                    self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
                 else:
                     return -1
             else:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
-                    self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
                 else:
                     return -1
             if self.check_addr(self.MBR.get_val()):
@@ -460,11 +470,12 @@ class CPU:
 
     # executes one instruction by fetching instruction address from Program Counter
     def step(self):
-        self.MAR.set_val(self.PC.get_addr())
-        self.PC.increment_addr()  # points to next instruction
+        self.MAR.set_val(self.PC.get_addr()) #PC = 0
+        self.PC.increment_addr()  # PC = 1
 
         addr = self.MAR.get_val()
-        self.MBR.set_val(self.Memory.words[addr])
+        #self.MBR.set_val(self.Memory.words[addr])
+        self.MBR.set_val(self.Cache.get_word(addr))
 
         self.IR.set_instruction(self.MBR.get_val())
 

@@ -27,7 +27,6 @@ class Memory:
                 #     self.data[addr] = val
                 self.words[addr] = val
 
-
 # for testing purposes
 def main():
     print('{0:016b}'.format(6))
