@@ -610,7 +610,8 @@ def LD_MBR():
     return
 
 def LD_KB():
-    cpu.Device.set_keyboard(Keyboard.get())
+    cpu.Device.set_keyboard(int(Keyboard.get()))
+    print(int(Keyboard.get()))
     return
 
 def show_general_register(general_register):
@@ -750,7 +751,7 @@ def run():
     while 1:
         code = singlestep()
         gui.update()
-        time.sleep(3)
+        time.sleep(1)
         if code == -1:
             return
 
@@ -761,6 +762,11 @@ def init():
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
+    if 'program1' in str(filename).lower():
+        cpu.IndexRegisters[0].set_val(10)
+        cpu.IndexRegisters[1].set_val(100)
+        cpu.IndexRegisters[2].set_val(1000)
+
 
 
 # Place the LD buttons in the grid

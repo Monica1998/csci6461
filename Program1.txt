@@ -1,0 +1,37 @@
+# address in decimal.
+0007 079B # LDR mem(127) to r(3)
+0008 C600 # IN devid(0) to r(2)
+0009 0B9B # STR r(3) to mem(127)
+000A 0599 # LDR mem(125) to R1
+000B 159B # SMR R1 - mem(127) to R1
+000C 0997 # STR R1 to mem(123)
+000D 0AB7 # STR R2 to mem(mem(123))
+000E 3B08 # SOB R3 go to 08
+000F C600 # IN devid(0) to r(2)
+0010 0A96 # STR R2 to mem(122)
+0011 0780 # LDR mem(100) to R3
+0012 0B80 # STR R3 to mem(100)
+0013 0696 # LDR mem(122) to R2
+0014 0599 # LDR mem(125) to R1
+0015 1580 # SMR R1 - mem(100) to R1
+0016 0997 # STR R1 to mem(123)
+0017 16B7 # SMR R2 - mem(mem(123))
+0018 291A # JCC to 26##
+0019 2C1C # JMA to 28##
+001A 06B7 # LDR mem(mem(123)) to R2 ##26
+001B 1696 # SMR R2 - mem(122) to R2
+001C 0A9A # STR R2 to mem(126) ##28
+001D 1698 # SMR R2 - mem(124)
+001E 2956 # JCC to 32##
+001F 2C5A # JMA to 36##
+0020 069A # LDR mem(126) to R2 ##32
+0021 0A98 # STR R2 to mem(124)
+0022 06B7 # LDR mem(mem(123)) to R2
+0023 0A95 # STR R2 to mem(121)
+0024 3B12 # SOB R3 go to 12  ##36
+0025 0495 # LDR mem(121) to R0
+0026 C801 # OUT output r(0) to devid(1)
+0064 0014
+007C FFFF
+007D 0079
+007F 0014

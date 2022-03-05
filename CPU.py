@@ -5,8 +5,8 @@ from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as G
 from Memory import Memory
 from cache import Cache
 
-MAX_VALUE = 2147483647
-MIN_VALUE = -2147483648
+MAX_VALUE = 65536
+MIN_VALUE = 0
 OVERFLOW = 0
 UNDERFLOW = 1
 
@@ -30,7 +30,7 @@ class CPU:
 
     # resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
-        self.PC = PC(0)  # starting addr from IPL.txt
+        self.PC = PC(7)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
         self.MAR = MAR()
@@ -50,7 +50,7 @@ class CPU:
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         self.GRs[general_register].set_val(self.MBR.get_val())
-       # self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # store data from general register to memory
     def STR(self, operand, index_register, mode, general_register):
@@ -58,9 +58,8 @@ class CPU:
         if effective_addr == -1:
             return
         self.MBR.set_val(self.GRs[general_register].get_val())
-        self.Cache.set_word(effective_addr, self.MBR.get_val())
-        #self.Memory.words[effective_addr] = self.MBR.get_val()
-        #self.PC.increment_addr()
+        self.Memory.words[effective_addr] = self.MBR.get_val()
+        self.PC.increment_addr()
 
     # load effective address into general register
     def LDA(self, operand, index_register, mode, general_register):
@@ -68,7 +67,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.GRs[general_register].set_val(effective_addr)
-        #self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # load data into index register
     def LDX(self, operand, index_register, mode, general_register):
@@ -89,7 +88,7 @@ class CPU:
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
         #self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
         self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
-        #self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # Jump if Equal
     def JZ(self, operand, index_register, mode, general_register):
@@ -119,7 +118,8 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        if cc == 1:
+        bits = decimal_to_binary(self.CC.get_val(), bit=4)
+        if bits[cc] == '1':
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
@@ -161,10 +161,10 @@ class CPU:
         self.MAR.set_val(effective_addr)
         result = self.GRs[general_register].get_val() - 1
         self.GRs[general_register].set_val(result)
-        if (self.GRs[general_register].get_val() > 0):
+        if self.GRs[general_register].get_val() > 0:
             self.PC.set_addr(effective_addr)
         else:
-            PC.increment_addr() #PC = 2
+            self.PC.increment_addr()
 
     # Jump Greater than or equal to
     def JGE(self, operand, index_register, mode, general_register):
@@ -172,7 +172,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        if (self.GRs[general_register].get_val() >= 0):
+        if self.GRs[general_register].get_val() >= 0:
             self.PC.set_addr(effective_addr)
         else:
             self.PC.increment_addr()
@@ -180,6 +180,7 @@ class CPU:
     # Add memory to register.
     def AMR(self, operand, index_register, mode, general_register):
         # immed = operand
+        self.CC.set_val(0)
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
@@ -191,12 +192,21 @@ class CPU:
 
         result = self.GRs[general_register].get_val() + self.MBR.get_val()
         # Check overflow.
-        if MIN_VALUE <= result <= MAX_VALUE:
+        if self.check_cc(result) == OVERFLOW:
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        elif self.check_cc(result) == UNDERFLOW:
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        else:
             self.GRs[general_register].set_val(result)
         self.PC.increment_addr()
 
     # Subtract memory from register.
     def SMR(self, operand, index_register, mode, general_register):
+        self.CC.set_val(0)
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
@@ -223,6 +233,7 @@ class CPU:
     # Add immediate to register.
     def AIR(self, operand, index_register, mode, general_register):
         # immed = operand
+        self.CC.set_val(0)
         if operand == 0:
             return
         if general_register == 0:
@@ -245,6 +256,7 @@ class CPU:
     # Subtract immediate from register.
     def SIR(self, operand, index_register, mode, general_register):
         # immed = operand
+        self.CC.set_val(0)
         if operand == 0:
             return
         if general_register == 0:
@@ -267,6 +279,7 @@ class CPU:
     # Multiply register by register.
     def MLT(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
+        self.CC.set_val(0)
         if (general_register != 0 and general_register != 2) or \
                 (index_register != 0 and index_register != 2):
             return
@@ -290,6 +303,7 @@ class CPU:
     # Divide register by register.
     def DVD(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
+        self.CC.set_val(0)
         if (general_register != 0 and general_register != 2) or \
                 (index_register != 0 and index_register != 2):
             return
@@ -318,6 +332,7 @@ class CPU:
     # Test the equality of register and register.
     def TRR(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
+        self.CC.set_val(0)
         if (general_register != 0 and general_register != 2) or \
                 (index_register != 0 and index_register != 2):
             return
@@ -396,9 +411,9 @@ class CPU:
             pass
         self.PC.increment_addr()
 
-    def OUT(self, operand, index_register, mode, general_register):
+    def OUT(self, dev_id, index_register, mode, general_register):
         # devid = operand
-        if operand == 1:  # Console Printer
+        if dev_id == 1:  # Console Printer
             self.Device.set_printer(self.GRs[general_register].get_val())
         else:
             pass
@@ -459,7 +474,7 @@ class CPU:
 
     # check overflow and underflow.
     def check_cc(self, num):
-        if num > MAX_VALUE:
+        if num >= MAX_VALUE:
             return OVERFLOW
         elif num < MIN_VALUE:
             return UNDERFLOW
@@ -470,8 +485,8 @@ class CPU:
 
     # executes one instruction by fetching instruction address from Program Counter
     def step(self):
-        self.MAR.set_val(self.PC.get_addr()) #PC = 0
-        self.PC.increment_addr()  # PC = 1
+        self.MAR.set_val(self.PC.get_addr())
+        self.PC.increment_addr()  # points to next instruction
 
         addr = self.MAR.get_val()
         #self.MBR.set_val(self.Memory.words[addr])
@@ -498,23 +513,23 @@ class CPU:
         elif opcode == 6:
             return self.AIR(operand, index_register, mode, general_register)
         elif opcode == 7:
-            return self.JZ(operand, index_register, mode, general_register)
-        elif opcode == 8:
-            return self.JNE(operand, index_register, mode, general_register)
-        elif opcode == 9:
-            return self.JCC(operand, index_register, mode, general_register)
-        elif opcode == 10:
-            return self.JMA(operand, index_register, mode, general_register)
-        elif opcode == 11:
-            return self.JSR(operand, index_register, mode, general_register)
-        elif opcode == 12:
-            return self.RFS(operand, index_register, mode, general_register)
-        elif opcode == 13:
-            return self.SOB(operand, index_register, mode, general_register)
-        elif opcode == 14:
-            return self.JGE(operand, index_register, mode, general_register)
-        elif opcode == 15:
             return self.SIR(operand, index_register, mode, general_register)
+        elif opcode == 8:
+            return self.JZ(operand, index_register, mode, general_register)
+        elif opcode == 9:
+            return self.JNE(operand, index_register, mode, general_register)
+        elif opcode == 10:
+            return self.JCC(operand, index_register, mode, general_register)
+        elif opcode == 11:
+            return self.JMA(operand, index_register, mode, general_register)
+        elif opcode == 12:
+            return self.JSR(operand, index_register, mode, general_register)
+        elif opcode == 13:
+            return self.RFS(operand, index_register, mode, general_register)
+        elif opcode == 14:
+            return self.SOB(operand, index_register, mode, general_register)
+        elif opcode == 15:
+            return self.JGE(operand, index_register, mode, general_register)
         elif opcode == 16:
             return self.MLT(operand, index_register, mode, general_register)
         elif opcode == 17:
@@ -531,6 +546,10 @@ class CPU:
             return self.SRC(operand, index_register, mode, general_register)
         elif opcode == 26:
             return self.RRC(operand, index_register, mode, general_register)
+        elif opcode == 49:
+            return self.IN(operand, index_register, mode, general_register)
+        elif opcode == 50:
+            return self.OUT(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
@@ -560,24 +579,22 @@ class CPU:
             return self.AIR(operand, index_register, mode, general_register)
         elif opcode == 7:
             return self.SIR(operand, index_register, mode, general_register)
-        elif opcode == 7:
-            return self.JZ(operand, index_register, mode, general_register)
         elif opcode == 8:
-            return self.JNE(operand, index_register, mode, general_register)
+            return self.JZ(operand, index_register, mode, general_register)
         elif opcode == 9:
-            return self.JCC(operand, index_register, mode, general_register)
+            return self.JNE(operand, index_register, mode, general_register)
         elif opcode == 10:
-            return self.JMA(operand, index_register, mode, general_register)
+            return self.JCC(operand, index_register, mode, general_register)
         elif opcode == 11:
-            return self.JSR(operand, index_register, mode, general_register)
+            return self.JMA(operand, index_register, mode, general_register)
         elif opcode == 12:
-            return self.RFS(operand, index_register, mode, general_register)
+            return self.JSR(operand, index_register, mode, general_register)
         elif opcode == 13:
-            return self.SOB(operand, index_register, mode, general_register)
+            return self.RFS(operand, index_register, mode, general_register)
         elif opcode == 14:
-            return self.JGE(operand, index_register, mode, general_register)
+            return self.SOB(operand, index_register, mode, general_register)
         elif opcode == 15:
-            return self.SIR(operand, index_register, mode, general_register)
+            return self.JGE(operand, index_register, mode, general_register)
         elif opcode == 16:
             return self.MLT(operand, index_register, mode, general_register)
         elif opcode == 17:
