@@ -252,7 +252,7 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
-            self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # Subtract immediate from register.
     def SIR(self, operand, index_register, mode, general_register):
@@ -275,7 +275,7 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.GRs[general_register].set_val(result)
-            self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # Multiply register by register.
     def MLT(self, operand, index_register, mode, general_register):
@@ -328,7 +328,7 @@ class CPU:
                 remainder = self.GRs[general_register].get_val() % self.GRs[index_register].get_val()
                 self.GRs[general_register].set_val(result)
                 self.GRs[general_register + 1].set_val(remainder)
-            self.PC.increment_addr()
+        self.PC.increment_addr()
 
     # Test the equality of register and register.
     def TRR(self, operand, index_register, mode, general_register):
