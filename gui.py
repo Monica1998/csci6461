@@ -463,8 +463,13 @@ Empty2 = Label(frameswitches).grid(row=17)
 
 CacheLabel1 = Label(gui, text="Cache").grid(row=18, column=1)
 ConsoleLogLabel = Label(gui, text="Console Log").grid(row=18, column = 3)
-Cache = Entry(gui, width=30, borderwidth=5).grid(row=19, column=1, padx=10, pady=10, ipady=75)
-ConsoleLog = Entry(gui, width=30, borderwidth=5).grid(row=19, column = 3)
+Cache = Entry(gui, width=30, borderwidth=5)
+ConsoleLog = Entry(gui, width=30, borderwidth=5)
+
+ConsoleLog.insert(0, "00")
+
+Cache.grid(row=19, column=1, padx=10, pady=10, ipady=75)
+ConsoleLog.grid(row=19, column = 3)
 
 # Initialize Register textboxes
 GPR0 = Entry(gui, width=30, borderwidth=5)
@@ -484,7 +489,6 @@ MFR = Entry(gui, width=30, borderwidth=5)
 Privileged = Entry(gui, width=30, borderwidth=5)
 Keyboard = Entry(gui, width=30, borderwidth=5)
 Printer = Entry(gui, width=30, borderwidth=5)
-
 
 # Initialize register values
 GPR0.insert(0, "0000000000000000")
@@ -793,8 +797,8 @@ MAR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MAR).grid(row=1, colu
 MBR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MBR).grid(row=2, column=7)
 KB_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_KB).grid(row=6, column=7)
 
-def cache():
-    cachew.open()
+# def cache():
+#     cachew.open()
 
 # Initializing operation buttons
 Store = Button(frameoperation, text="Store", command=store)
@@ -803,7 +807,7 @@ Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
 SS = Button(framerun, text="SS", command=singlestep)
 Run = Button(framerun, text="Run", command=run)
-Cache = Button(framerun, text="Cache", command=cache)
+# Cache = Button(framerun, text="Cache", command=cache)
 
 # Initializing Halt and Run Light
 HaltLabel = Label(framerun, text="Halt")
