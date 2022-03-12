@@ -463,7 +463,7 @@ Empty2 = Label(frameswitches).grid(row=17)
 
 CacheLabel1 = Label(gui, text="Cache").grid(row=18, column=1)
 ConsoleLogLabel = Label(gui, text="Console Log").grid(row=18, column = 3)
-Cache = Entry(gui, width=30, borderwidth=5).grid(row=19, column=1)
+Cache = Entry(gui, width=30, borderwidth=5).grid(row=19, column=1, padx=10, pady=10, ipady=75)
 ConsoleLog = Entry(gui, width=30, borderwidth=5).grid(row=19, column = 3)
 
 # Initialize Register textboxes
@@ -485,8 +485,6 @@ Privileged = Entry(gui, width=30, borderwidth=5)
 Keyboard = Entry(gui, width=30, borderwidth=5)
 Printer = Entry(gui, width=30, borderwidth=5)
 
-Cache = Entry(gui, width=30, borderwidth=5)
-ConsoleLog = Entry(gui, width=30, borderwidth=5)
 
 # Initialize register values
 GPR0.insert(0, "0000000000000000")
@@ -832,7 +830,7 @@ Init.grid(row=7, column=10)
 SS.grid(row=1, column=0)
 
 Run.grid(row=1, column=3)
-#Cache.grid(row=1, column=7)
+# Cache.grid(row=1, column=7)
 
 
 
