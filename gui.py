@@ -4,7 +4,7 @@ from tkinter import *
 from CPU import *
 from converter import *
 from tkinter import filedialog as fd
-from tkinter import messagebox 
+from tkinter import messagebox
 import cachew
 
 # Initialize Tkinter
@@ -462,14 +462,12 @@ Empty1 = Label(frameswitches).grid(row=16)
 Empty2 = Label(frameswitches).grid(row=17)
 
 CacheLabel1 = Label(gui, text="Cache").grid(row=18, column=1)
-ConsoleLogLabel = Label(gui, text="Console Log").grid(row=18, column = 3)
-Cache = Entry(gui, width=30, borderwidth=5)
-ConsoleLog = Entry(gui, width=30, borderwidth=5)
+ConsoleLogLabel = Label(gui, text="Console Log").grid(row=18, column=3)
+Cache = Text(gui, width=70, height=20, borderwidth=5, font=("Helvetica", 13))
+ConsoleLog = Text(gui, width=70, height=20, borderwidth=5, font=("Helvetica", 13))
 
-ConsoleLog.insert(0, "00")
-
-Cache.grid(row=19, column=1, padx=10, pady=10, ipady=75)
-ConsoleLog.grid(row=19, column = 3)
+Cache.grid(row=19, column=1, padx=10, pady=10)
+ConsoleLog.grid(row=19, column=3)
 
 # Initialize Register textboxes
 GPR0 = Entry(gui, width=30, borderwidth=5)
@@ -622,10 +620,12 @@ def LD_MBR():
     cpu.MBR.set_val(binary_string_to_decimal(MBR.get()))
     return
 
+
 def LD_KB():
     cpu.Device.set_keyboard(int(Keyboard.get()))
-    print(int(Keyboard.get()))
+    ConsoleLog.insert(END, str(int(Keyboard.get())) + ' ')
     return
+
 
 def show_general_register(general_register):
     match general_register:
@@ -686,6 +686,8 @@ def reset():
     IR.insert(0, "0000000000000000")
     MFR.insert(0, "0000")
     Privileged.insert(0, "0")
+    Cache.delete("1.0", END)
+    ConsoleLog.delete("1.0", END)
     cpu.reset()
 
 
@@ -741,6 +743,21 @@ def singlestep():
         show_general_register(general_register)
         show_index_register(index_register)
         Printer.delete(0, END)
+        cache_log = "Cache# | Block# | Memory Addr | Contents  \n"
+        cache_index = 0
+        while cache_index < len(cpu.Cache.lines):
+            block_num = cpu.Cache.lines[cache_index - 1][0]
+            block = cpu.Cache.lines[cache_index - 1][1]
+            for i in range(4):
+                mem_add = block_num * 4 + block[i][0]
+                cache_log = cache_log \
+                            + str(cache_index) + '\t' \
+                            + str(block_num) + '\t' \
+                            + str(mem_add) + '\t    ' \
+                            + str(block[i][1]) + '\n'
+            cache_index += 1
+        Cache.delete("1.0", END)
+        Cache.insert(END, cache_log)
         if opcode == 50:
             Printer.insert(0, str(cpu.Device.get_printer()))
 
@@ -779,7 +796,6 @@ def init():
         cpu.IndexRegisters[0].set_val(10)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
-
 
 
 # Place the LD buttons in the grid
@@ -835,7 +851,6 @@ SS.grid(row=1, column=0)
 
 Run.grid(row=1, column=3)
 # Cache.grid(row=1, column=7)
-
 
 
 gui.mainloop()
