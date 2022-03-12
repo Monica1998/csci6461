@@ -623,7 +623,14 @@ def LD_MBR():
 
 def LD_KB():
     cpu.Device.set_keyboard(int(Keyboard.get()))
-    ConsoleLog.insert(END, str(int(Keyboard.get())) + ' ')
+    log = "User Input (20 numbers): \n"
+    for i in range(len(cpu.Device.keyboard)):
+        if i == 20:
+            log = log + '\n\n' + 'Target Number: ' + str(cpu.Device.keyboard[i])
+            continue
+        log = log + str(cpu.Device.keyboard[i]) + ' '
+    ConsoleLog.delete("1.0", END)
+    ConsoleLog.insert(END, log)
     return
 
 
