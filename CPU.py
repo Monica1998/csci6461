@@ -140,7 +140,7 @@ class CPU:
             return
         self.MAR.set_val(effective_addr)
         result = self.PC.get_addr() + 1
-        self.GRs[general_register(3)].set_val(result)
+        self.GRs[GR(3)].set_val(result)
         self.PC.set_addr(effective_addr)
         # R0 should contain pointer to arguments. Argument list should end with -1 (all 1s) value
 
@@ -150,8 +150,9 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        self.GRs[general_register(0)].set_val(operand)
-        self.PC.set_addr(self.GRs[general_register(3)].get_val())
+        self.GRs[GR(0)].set_val(effective_addr)
+        temp = self.GRs[GR(3)].get_val()
+        self.PC.set_addr(temp)
         # IX, I fields are ignored
 
     # Subtract One and Branch
