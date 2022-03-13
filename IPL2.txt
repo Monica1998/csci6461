@@ -10,23 +10,24 @@
 0010 1214 # AMR 2,0,20; r<-c(r) + c(EA)
 0011 07DB # LDR mem(1027) to r(3)
 0012 3714 # RFS 20; r0 <- immed, PC <- c(R3)
-0013 331B # JSR 3, 27; r3 <- PC + 1; PC <- EA
+0013 3314 # JSR 3, 27; r3 <- PC + 1; PC <- EA
 0014 049B # LDR mem(127) to r(0)
 0015 4000 # MLT 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) * c(ry)
 0016 4400 # DVD 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) / c(ry)
 0017 4800 # TRR 0, 0; If c(rx) = c(ry), set cc(4) <- 1; else, cc(4) <- 0
 0018 049B # LDR mem(127) to r(0)
-0019 4C40 # AND 0, 1; c(rx) <- c(rx) AND c(ry)
-001A 5040 # OR 0, 1; c(rx) <- c(rx) OR c(ry)
-001B 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
-001C 6443 # SRC 0, 3, left, arith
-001D 6403 # SRC 0, 3, right, arith
-001E 64C3 # SRC 0, 3, left, logically
-001F 6483 # SRC 0, 3, right, logically
-0020 6843 # RRC 0, 3, left
-0021 6803 # RRC 0, 3, right
+0019 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
+001A 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
+001B 4C40 # AND 0, 1; c(rx) <- c(rx) AND c(ry)
+001C 5040 # OR 0, 1; c(rx) <- c(rx) OR c(ry)
+001D 6443 # SRC 0, 3, left, arith
+001E 6403 # SRC 0, 3, right, arith
+001F 64C3 # SRC 0, 3, left, logically
+0020 6483 # SRC 0, 3, right, logically
+0021 6843 # RRC 0, 3, left
+0022 6803 # RRC 0, 3, right
 0064 0014
 007C FFFF
 007D 0079
 007F 0014
-0403 0019
+0403 0013
