@@ -140,7 +140,7 @@ class CPU:
             return
         self.MAR.set_val(effective_addr)
         result = self.PC.get_addr() + 1
-        self.GRs[GR(3)].set_val(result)
+        self.GRs[3].set_val(result)
         self.PC.set_addr(effective_addr)
         # R0 should contain pointer to arguments. Argument list should end with -1 (all 1s) value
 
@@ -150,8 +150,8 @@ class CPU:
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
-        self.GRs[GR(0)].set_val(effective_addr)
-        temp = self.GRs[GR(3)].get_val()
+        self.GRs[0].set_val(operand)
+        temp = self.GRs[3].get_val()
         self.PC.set_addr(temp)
         # IX, I fields are ignored
 
@@ -349,28 +349,28 @@ class CPU:
         self.PC.increment_addr()
 
     # Logical And of register and register
-    def AND(self, operand, ry, mode, rx):
+    def AND(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
-        self.GRs[rx].set_val(self.GRs[rx].get_val() & self.GRs[ry].get_val())
+        self.GRs[general_register].set_val(general_register & index_register)
         self.PC.increment_addr()
 
     # Logical Or of register and register
-    def ORR(self, operand, ry, mode, rx):
+    def ORR(self, operand, index_register, mode, general_register):
         # rx = general_register, ry = index_register
-        self.GRs[rx].set_val(self.GRs[rx].get_val() | self.GRs[ry].get_val())
+        self.GRs[general_register].set_val(general_register | index_register)
         self.PC.increment_addr()
 
     # Logical Not of register and register
-    def NOT(self, operand, ry, mode, rx):
+    def NOT(self, operand, index_register, mode, general_register):
         # rx = general_register
-        self.GRs[rx].set_val(~self.GRs[rx].get_val())
+        self.GRs[general_register].set_val(~general_register)
         self.PC.increment_addr()
 
     # Shift register by count
     def SRC(self, operand, index_register, mode, general_register):
         # A_L = index_register 1st bit, L_R = index_register 2nd bit, Count = operand
-        A_L = int(decimal_to_binary(index_register, 2)[0])
-        L_R = int(decimal_to_binary(index_register, 2)[1])
+        A_L = decimal_to_binary(index_register, 2)[0]
+        L_R = decimal_to_binary(index_register, 2)[1]
         if A_L == 0:
             if L_R == 0:
                 self.GRs[general_register].set_val(self.GRs[general_register].get_val() >> operand)
@@ -391,7 +391,7 @@ class CPU:
     # Rotate register by count
     def RRC(self, operand, index_register, mode, general_register):
         # L_R = index_register 2nd bit, Count = operand
-        L_R = int(decimal_to_binary(index_register, 2)[1])
+        L_R = decimal_to_binary(index_register, 2)[1]
         bits = decimal_to_binary(self.GRs[general_register].get_val())
         bits = bits.replace("0000000000000000", "")
         if self.GRs[general_register].get_val() < 0:
@@ -400,7 +400,7 @@ class CPU:
             self.GRs[general_register].set_val(binary_string_to_decimal(bits[operand:] + bits[:operand]))
         elif L_R == 0:
             self.GRs[general_register].set_val(
-                binary_string_to_decimal(bits[len(bits) - operand:] + bits[:len(bits) - operand]))
+                binary_string_to_decimal(bits[:len(bits) - operand] + bits[len(bits) - operand:]))
         self.PC.increment_addr()
 
     def IN(self, dev_id, index_register, mode, general_register):
