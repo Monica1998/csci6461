@@ -1,0 +1,29 @@
+0007 079B # LDR mem(127) to r(3)
+0008 231B # JZ 3,0,27; Jump if equal [PC<-EA] if c(r3) == 0, else PC = PC + 1
+0009 2E0D # JNE 2,0,13; Jump if not equal; if c(r3) != 0, PC = EA, else PC = PC + 1
+000A 3F07 # JGE 3,0,7 Jump greater than or equal to; if c(r3) >= 0, PC = EA, else PC = PC + 1
+000B 0B14 # STR 3,0,20; Store register 3 contents in location 20; 02 3 0 20; 0101100010100
+000C 1714 # SMR 3,0,20; Clear Register 3; 05 3 0 20; 110 11 00 0 1010
+000D 0D8A # AIR 3,10; Load register 2 with 10; 06 3 0 10; 110 11 00 0 1010
+000E 1714 # SMR 3,0,20; Clear Register 3; 05 3 0 20; 110 11 00 0 1010
+000F 0F8A # SIR 3,10; Subtract 10 from register 3
+0010 1214 # AMR 2,0,20; r<-c(r) + c(EA)
+0011 3714 # RFS 20; r0 <- immed, PC <- c(R3)
+0012 331B # JSR 3, 27; r3 <- PC + 1; PC <- EA
+0013 049B # LDR mem(127) to r(0)
+0014 4000 # MLT 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) * c(ry)
+0015 4400 # DVD 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) / c(ry)
+0016 4800 # TRR 0, 0; If c(rx) = c(ry), set cc(4) <- 1; else, cc(4) <- 0
+0017 4C00 # AND 0, 0; c(rx) <- c(rx) AND c(ry)
+0018 5000 # OR 0, 0; c(rx) <- c(rx) OR c(ry)
+0019 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
+001A 6443 # SRC 0, 3, left, arith
+001B 6403 # SRC 0, 3, right, arith
+001C 64C3 # SRC 0, 3, left, logically
+001D 6483 # SRC 0, 3, right, logically
+001E 6843 # RRC 0, 3, left
+001F 6803 # RRC 0, 3, right
+0064 0014
+007C FFFF
+007D 0079
+007F 0014

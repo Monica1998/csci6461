@@ -788,7 +788,7 @@ def run():
     while 1:
         code = singlestep()
         gui.update()
-        time.sleep(1)
+        #time.sleep(1)
         if code == -1:
             return
 
