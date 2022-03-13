@@ -729,8 +729,8 @@ def reset():
     IR.insert(0, "0000000000000000")
     MFR.insert(0, "0000")
     Privileged.insert(0, "0")
-    Cache.delete("1.0", END)
-    ConsoleLog.delete("1.0", END)
+    #Cache.delete("1.0", END)
+    #ConsoleLog.delete("1.0", END)
     cpu.reset()
 
 
