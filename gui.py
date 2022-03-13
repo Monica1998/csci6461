@@ -1,11 +1,7 @@
-import os
-import time
 from tkinter import *
 from CPU import *
 from converter import *
 from tkinter import filedialog as fd
-from tkinter import messagebox
-import cachew
 
 # Initialize Tkinter
 gui = Tk()
@@ -898,7 +894,7 @@ RunLabel.grid(row=7, column=5)
 HaltLight.grid(row=1, column=4)
 RunLight.grid(row=1, column=5)
 
-# Placing operarion buttons on the grid
+# Placing operation buttons on the grid
 Store.grid(row=7, column=7)
 StorePlus.grid(row=7, column=8)
 Load.grid(row=7, column=9)
