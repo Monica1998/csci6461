@@ -12,6 +12,45 @@ gui = Tk()
 gui.title("Assemble Simulator")
 
 cpu = CPU(2048)
+opdict = {
+    0: 'HLT',
+    24: 'TRAP',
+    1: 'LDR',
+    2: 'STR',
+    3: 'LDA',
+    33: 'LDX',
+    34: 'STX',
+    8: 'JZ',
+    9: 'JNE',
+    10: 'JCC',
+    11: 'JMA',
+    12: 'JSR',
+    13: 'RFS',
+    14: 'SOB',
+    15: 'JGE',
+    4: 'AMR',
+    5: 'SMR',
+    6: 'AIR',
+    7: 'SIR',
+    16: 'MLT',
+    17: 'DVD',
+    18: 'TRR',
+    19: 'AND',
+    20: 'ORR',
+    21: 'NOT',
+    25: 'SRC',
+    26: 'RRC',
+    49: 'IN',
+    50: 'OUT',
+    51: 'CHK',
+    27: 'FADD',
+    28: 'FSUB',
+    29: 'VADD',
+    30: 'VSUB',
+    31: 'CNVRT',
+    40: 'LDFR',
+    41: 'STFR'
+}
 
 # Initialize and Place Frames
 frameswitches = LabelFrame(gui, borderwidth=0, highlightthickness=0)
@@ -626,9 +665,10 @@ def LD_KB():
     log = "User Input (20 numbers): \n"
     for i in range(len(cpu.Device.keyboard)):
         if i == 20:
-            log = log + '\n\n' + 'Target Number: ' + str(cpu.Device.keyboard[i])
+            log = log + '\n\n' + 'Target Number: ' + str(cpu.Device.keyboard[i]) + "\n"
             continue
         log = log + str(cpu.Device.keyboard[i]) + ' '
+    log += '\n'
     ConsoleLog.delete("1.0", END)
     ConsoleLog.insert(END, log)
     return
@@ -727,9 +767,15 @@ def singlestep():
     addr = cpu.MAR.get_val()
     cpu.MBR.set_val(cpu.Memory.words[addr])
     cpu.IR.set_instruction(cpu.MBR.get_val())
+    console_log = ""
     opcode, operand, index_register, mode, general_register = cpu.IR.decode()
     code = cpu.single_step(opcode, operand, index_register, mode, general_register)
 
+    console_log = str(opdict[opcode]) + ' ' + \
+                  "R(" + str(general_register) + ") " + \
+                  "IX(" + str(index_register) + ") " + \
+                  "I(" + str(mode) + ") " + \
+                  "Address(" + str(operand) + ") \n"
     # HALT
     if code == -1:
         HaltLight.delete(0, END)
@@ -750,6 +796,7 @@ def singlestep():
         show_general_register(general_register)
         show_index_register(index_register)
         Printer.delete(0, END)
+
         cache_log = "Cache# | Block# | Memory Addr | Contents  \n"
         cache_index = 0
         while cache_index < len(cpu.Cache.lines):
@@ -765,6 +812,8 @@ def singlestep():
             cache_index += 1
         Cache.delete("1.0", END)
         Cache.insert(END, cache_log)
+        ConsoleLog.insert(END, console_log)
+
         if opcode == 50:
             Printer.insert(0, str(cpu.Device.get_printer()))
 
@@ -788,7 +837,7 @@ def run():
     while 1:
         code = singlestep()
         gui.update()
-        #time.sleep(1)
+        # time.sleep(1)
         if code == -1:
             return
 
@@ -799,7 +848,7 @@ def init():
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
-    if 'program1' in str(filename).lower():
+    if 'program1' or 'ipl2' in str(filename).lower():
         cpu.IndexRegisters[0].set_val(10)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
