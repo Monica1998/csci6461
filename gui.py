@@ -841,6 +841,8 @@ def run():
 def init():
     filename = fd.askopenfilenames()
     reset()
+    Cache.delete("1.0", END)
+    ConsoleLog.delete("1.0", END)
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
