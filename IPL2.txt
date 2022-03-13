@@ -14,15 +14,16 @@
 0014 4000 # MLT 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) * c(ry)
 0015 4400 # DVD 0, 0; r0 (high order bits), r0 + 1 (low order bits) <- c(rx) / c(ry)
 0016 4800 # TRR 0, 0; If c(rx) = c(ry), set cc(4) <- 1; else, cc(4) <- 0
-0017 4C00 # AND 0, 0; c(rx) <- c(rx) AND c(ry)
-0018 5000 # OR 0, 0; c(rx) <- c(rx) OR c(ry)
-0019 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
-001A 6443 # SRC 0, 3, left, arith
-001B 6403 # SRC 0, 3, right, arith
-001C 64C3 # SRC 0, 3, left, logically
-001D 6483 # SRC 0, 3, right, logically
-001E 6843 # RRC 0, 3, left
-001F 6803 # RRC 0, 3, right
+0017 049B # LDR mem(127) to r(0)
+0018 4C40 # AND 0, 1; c(rx) <- c(rx) AND c(ry)
+0019 5040 # OR 0, 1; c(rx) <- c(rx) OR c(ry)
+001A 5400 # NOT 0, 0; c(rx) <- NOT c(rx)
+001B 6443 # SRC 0, 3, left, arith
+001C 6403 # SRC 0, 3, right, arith
+001D 64C3 # SRC 0, 3, left, logically
+001E 6483 # SRC 0, 3, right, logically
+001F 6843 # RRC 0, 3, left
+0020 6803 # RRC 0, 3, right
 0064 0014
 007C FFFF
 007D 0079
