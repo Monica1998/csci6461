@@ -1,11 +1,7 @@
-import os
-import time
 from tkinter import *
 from CPU import *
 from converter import *
 from tkinter import filedialog as fd
-from tkinter import messagebox
-import cachew
 
 # Initialize Tkinter
 gui = Tk()
@@ -733,8 +729,8 @@ def reset():
     IR.insert(0, "0000000000000000")
     MFR.insert(0, "0000")
     Privileged.insert(0, "0")
-    Cache.delete("1.0", END)
-    ConsoleLog.delete("1.0", END)
+    #Cache.delete("1.0", END)
+    #ConsoleLog.delete("1.0", END)
     cpu.reset()
 
 
@@ -845,6 +841,8 @@ def run():
 def init():
     filename = fd.askopenfilenames()
     reset()
+    Cache.delete("1.0", END)
+    ConsoleLog.delete("1.0", END)
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
@@ -898,7 +896,7 @@ RunLabel.grid(row=7, column=5)
 HaltLight.grid(row=1, column=4)
 RunLight.grid(row=1, column=5)
 
-# Placing operarion buttons on the grid
+# Placing operation buttons on the grid
 Store.grid(row=7, column=7)
 StorePlus.grid(row=7, column=8)
 Load.grid(row=7, column=9)
