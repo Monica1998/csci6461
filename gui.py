@@ -7,6 +7,7 @@ from tkinter import filedialog as fd
 gui = Tk()
 gui.title("Assemble Simulator")
 
+
 cpu = CPU(2048)
 opdict = {
     0: 'HLT',
@@ -54,9 +55,11 @@ frameswitches.grid(row=9, column=0, columnspan=5, padx=50, pady=10)
 frameregister = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameregister.grid(row=0, column=0)
 frameoperation = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-frameoperation.grid(row=8, column=6, columnspan=1, padx=50, pady=10)
+frameoperation.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
 framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-framerun.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
+framerun.grid(row=9, column=8, columnspan=1, padx=100, pady=10)
+# framerun.grid(row=10, column=6, columnspan=1, padx=100, pady=10)
+
 
 # Initialize and Place Register Labels
 GPR0Label = Label(gui, text="GRP 0(16bits)").grid(row=0, column=0)
@@ -80,6 +83,7 @@ MFRLabel = Label(gui, text="MFR(4bits)").grid(row=4, column=5)
 PrivilegedLabel = Label(gui, text="Privileged(1bits)").grid(row=5, column=5)
 KeyboardLabel = Label(gui, text="Keyboard").grid(row=6, column=5)
 PrinterLabel = Label(gui, text="Printer").grid(row=7, column=5)
+TargetLabel = Label(gui, text="Target Word").grid(row=8, column=5)
 
 # Initialize Switch Values to 0
 num15: int = 0
@@ -522,6 +526,7 @@ MFR = Entry(gui, width=30, borderwidth=5)
 Privileged = Entry(gui, width=30, borderwidth=5)
 Keyboard = Entry(gui, width=30, borderwidth=5)
 Printer = Entry(gui, width=30, borderwidth=5)
+Target = Entry(gui, width=30, borderwidth=5)
 
 # Initialize register values
 GPR0.insert(0, "0000000000000000")
@@ -539,6 +544,7 @@ MFR.insert(0, "0000")
 Privileged.insert(0, "0")
 Keyboard.insert(0, "")
 Printer.insert(0, "")
+Target.insert(0, "")
 
 # Placing Register textboxes
 GPR0.grid(row=0, column=1)
@@ -558,6 +564,7 @@ MFR.grid(row=4, column=6)
 Privileged.grid(row=5, column=6)
 Keyboard.grid(row=6, column=6)
 Printer.grid(row=7, column=6)
+Target.grid(row=8, column=6)
 
 
 # LD function for each register
@@ -668,6 +675,9 @@ def LD_KB():
     ConsoleLog.delete("1.0", END)
     ConsoleLog.insert(END, log)
     return
+
+def LD_TW():
+    pass
 
 
 def show_general_register(general_register):
@@ -851,6 +861,9 @@ def init():
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
 
+def program2():
+    filename2 = fd.askopenfilenames()
+
 
 # Place the LD buttons in the grid
 GPR0_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_GPR0).grid(row=0, column=2)
@@ -866,7 +879,7 @@ PC_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_PC).grid(row=0, column
 MAR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MAR).grid(row=1, column=7)
 MBR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MBR).grid(row=2, column=7)
 KB_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_KB).grid(row=6, column=7)
-
+TW_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_TW).grid(row=8, column=7)
 # def cache():
 #     cachew.open()
 
@@ -877,7 +890,8 @@ Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
 SS = Button(framerun, text="SS", command=singlestep)
 Run = Button(framerun, text="Run", command=run)
-# Cache = Button(framerun, text="Cache", command=cache)
+# Empty3 = Label(frameoperation).grid(row=17)
+Program2 = Button(frameoperation, text="Program2", command=program2)
 
 # Initializing Halt and Run Light
 HaltLabel = Label(framerun, text="Halt")
@@ -891,20 +905,22 @@ RunLight.insert(0, "0")
 HaltLight.insert(0, "0")
 
 # Placing Run and Halt labels and lights on the grid
-HaltLabel.grid(row=7, column=4)
-RunLabel.grid(row=7, column=5)
-HaltLight.grid(row=1, column=4)
-RunLight.grid(row=1, column=5)
+HaltLabel.grid(row=9, column=4)
+RunLabel.grid(row=9, column=5)
+HaltLight.grid(row=2, column=4)
+RunLight.grid(row=2, column=5)
 
 # Placing operation buttons on the grid
-Store.grid(row=7, column=7)
-StorePlus.grid(row=7, column=8)
-Load.grid(row=7, column=9)
-Init.grid(row=7, column=10)
-SS.grid(row=1, column=0)
+Store.grid(row=9, column=7)
+StorePlus.grid(row=9, column=8)
+Load.grid(row=9, column=9)
+Init.grid(row=9, column=10)
+SS.grid(row=2, column=0)
+Program2.grid(row=9, column=11)
 
-Run.grid(row=1, column=3)
+Run.grid(row=2, column=3)
 # Cache.grid(row=1, column=7)
 
 
+# gui.resizable(0,0)
 gui.mainloop()
