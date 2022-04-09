@@ -328,13 +328,10 @@ class CPU:
         self.PC.increment_addr()
 
     # Test the equality of register and register.
-    def TRR(self, operand, index_register, mode, general_register):
+    def TRR(self, operand, ry, mode, rx):
         # rx = general_register, ry = index_register
         self.CC.set_val(0)
-        if (general_register != 0 and general_register != 2) or \
-                (index_register != 0 and index_register != 2):
-            return
-        if general_register == index_register:
+        if self.GRs[rx] == self.GRs[ry]:
             bits = decimal_to_binary(self.CC.get_val(), bit=4)
             bits = bits[:3] + '1'
             self.CC.set_val(binary_string_to_decimal(bits))
@@ -416,6 +413,25 @@ class CPU:
         else:
             pass
         self.PC.increment_addr()
+
+    def TRAP(self, operand, index_register, mode, trap_code):
+        if trap_code > 15 or trap_code < 0:
+            bits = decimal_to_binary(self.MFR.get_val(), bit=4)
+            bits = bits[:2] + '1' + bits[3:]
+            self.MFR.set_val(binary_string_to_decimal(bits))
+
+        self.MAR.set_val(2)
+        self.MBR.set_val(self.PC.get_addr() + 1)
+        self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
+
+        self.MAR.set_val(0)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        table_addr = self.MBR.get_val()
+
+        self.MAR.set_val(trap_code + table_addr)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        routine = self.MBR.get_val()
+        self.PC.set_addr(routine)
 
     def HALT(self):
         return -1
