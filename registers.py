@@ -1,6 +1,46 @@
 from converter import binary_string_to_decimal, binary_string_to_hex, decimal_to_binary, hex_to_binary, hex_to_decimal
 
 
+opdict = {
+    0: 'HLT',
+    24: 'TRAP',
+    1: 'LDR',
+    2: 'STR',
+    3: 'LDA',
+    33: 'LDX',
+    34: 'STX',
+    8: 'JZ',
+    9: 'JNE',
+    10: 'JCC',
+    11: 'JMA',
+    12: 'JSR',
+    13: 'RFS',
+    14: 'SOB',
+    15: 'JGE',
+    4: 'AMR',
+    5: 'SMR',
+    6: 'AIR',
+    7: 'SIR',
+    16: 'MLT',
+    17: 'DVD',
+    18: 'TRR',
+    19: 'AND',
+    20: 'ORR',
+    21: 'NOT',
+    25: 'SRC',
+    26: 'RRC',
+    49: 'IN',
+    50: 'OUT',
+    51: 'CHK',
+    27: 'FADD',
+    28: 'FSUB',
+    29: 'VADD',
+    30: 'VSUB',
+    31: 'CNVRT',
+    40: 'LDFR',
+    41: 'STFR'
+}
+
 #parent register class with getters and setters
 class Register:
 
@@ -61,8 +101,9 @@ class IR():
         #index_register = (self.instruction // 2 ** 8) % 2 ** 2
         #mode = (self.instruction // 2 ** 10) % 2 ** 1
         #general_register = (self.instruction // 2 ** 6) % 2 ** 2
+        print('instruction : {}'.format(bits))
+        print('opcode = {}, operand = {}, index register = {}, mode = {}, general register = {}'.format(opdict[opcode], operand, index_register, mode, general_register))
         return opcode, operand, index_register, mode, general_register
-
 
 class IndexRegister(Register):
     pass
@@ -73,31 +114,19 @@ class GeneralRegister(Register):
 
 #for testing purposes
 def main():
-    with open('IPL.txt', 'r') as f:
+    ir = IR()
+    with open('Program2.txt', 'r') as f:
             lines = f.readlines()
             for line in lines:
                 if line.startswith('#'):
                     continue
-                addr, val = line.split(' ')[:2]
-                val = hex_to_decimal(val)
-                opcode = val % 2 ** 6
-                operand = val // 2 ** 11
-                index_register = (val // 2 ** 8) % 2 ** 2
-                mode = (val // 2 ** 10) % 2 ** 1
-                general_register = (val // 2 ** 6) % 2 ** 2
+                addr, word = line.split(' ')[:2]
+                word = hex_to_decimal(word)
+                ir.set_instruction(word)
+                ir.decode()
 
-                opcode_binary = '{0:06b}'.format(opcode)
-                operand_binary = '{0:05b}'.format(operand)
-                index_reg_binary = '{0:02b}'.format(index_register)
-                mode_binary = '{0:01b}'.format(mode)
-                gr_binary = '{0:02b}'.format(general_register)
 
-              #  print('opcode = {}, gr = {}, idx_r = {}, indirect = {}, gr = {}'.format(opcode_binary, gr_binary, index_reg_binary, mode_binary, operand_binary))
-
-                bin_instruction = opcode_binary + gr_binary + index_reg_binary + mode_binary + operand_binary
-                #print('bin_instruction = {}'.format(bin_instruction))
-                hex_res = binary_string_to_hex(bin_instruction)
-                print('hex_res = {}'.format(hex_res))
+                
 
 
 if __name__ == '__main__':

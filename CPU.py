@@ -80,6 +80,15 @@ class CPU:
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
         self.PC.increment_addr()
 
+    def LDX_mod(self, operand, index_register, mode, general_register):
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return
+        #self.MBR.set_val(self.Memory.words[effective_addr])
+        self.MBR.set_val(self.Cache.get_word(effective_addr))
+        self.IndexRegisters[general_register - 1].set_val(self.MBR.get_val())
+        self.PC.increment_addr()
+
     # store data from index register into memory
     def STX(self, operand, index_register, mode, general_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
@@ -501,7 +510,7 @@ class CPU:
         elif opcode == 3:
             return self.LDA(operand, index_register, mode, general_register)
         elif opcode == 33:
-            return self.LDX(operand, index_register, mode, general_register)
+            return self.LDX_mod(operand, index_register, mode, general_register)
         elif opcode == 34:
             return self.STX(operand, index_register, mode, general_register)
         elif opcode == 4:
@@ -626,7 +635,7 @@ class CPU:
 # for testing purposes
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem('IPL_part2.txt')
+    cpu.Memory.read_mem('IPL2.txt')
     cpu.step()
     cpu.step()
     cpu.step()

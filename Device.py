@@ -5,6 +5,8 @@ class Device:
         self.keyboard = list()
 
     def set_keyboard(self, val):
+        if isinstance(val,str):
+            val = ord(val)
         self.keyboard.append(val)
 
     def get_keyboard(self):
@@ -16,3 +18,10 @@ class Device:
 
     def get_printer(self):
         return self.printer
+
+if __name__ == '__main__':
+    d = Device()
+    d.set_keyboard(5)
+    d.set_keyboard('a')
+    print(d.get_keyboard())
+    print(d.get_keyboard())

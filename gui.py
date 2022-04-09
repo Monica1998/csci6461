@@ -847,7 +847,7 @@ def init():
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
     if 'program1' or 'ipl2' in str(filename).lower():
-        cpu.IndexRegisters[0].set_val(10)
+        cpu.IndexRegisters[0].set_val(0)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
 
