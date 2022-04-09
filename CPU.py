@@ -429,14 +429,17 @@ class CPU:
             bits = bits[:2] + '1' + bits[3:]
             self.MFR.set_val(binary_string_to_decimal(bits))
 
+        #Store PC for TRAP
         self.MAR.set_val(2)
         self.MBR.set_val(self.PC.get_addr() + 1)
         self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
 
+        #gets address of trap table 
         self.MAR.set_val(0)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         table_addr = self.MBR.get_val()
 
+        #set PC to mapped rountine from trap table
         self.MAR.set_val(trap_code + table_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         routine = self.MBR.get_val()

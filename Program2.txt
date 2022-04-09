@@ -23,7 +23,7 @@
 0198 4840 #TRR R0 R1, sets cc code, comparing read in data to \t to denote end of target word
 0199 2B02 #JCC c(3) to 2, if true, end of reading in target word, jump to 0002 to begin comparison
 019A 2C44 #JMA IR1 + 4 = 404 = if not equal go to 404 (0194), which fetches next char
-0000 6000 #TRAP to Trap 1, not sure what this actually does
+0000 6000 #TRAP to Trap 1, 
 0001 6001 #TRAP code 1, holds address to second item in trap table
 0002 06C3 #LDR R2 <- mem[1003], load \t (space), start of comparison processes
 0003 07C2 #LDR R3 <- mem[1002], loads '.'

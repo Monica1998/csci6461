@@ -115,15 +115,17 @@ class GeneralRegister(Register):
 #for testing purposes
 def main():
     ir = IR()
-    with open('Program2.txt', 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                if line.startswith('#'):
-                    continue
-                addr, word = line.split(' ')[:2]
-                word = hex_to_decimal(word)
-                ir.set_instruction(word)
-                ir.decode()
+    # with open('Program2.txt', 'r') as f:
+    #         lines = f.readlines()
+    #         for line in lines:
+    #             if line.startswith('#'):
+    #                 continue
+    #             addr, word = line.split(' ')[:2]
+    #             word = hex_to_decimal(word)
+    #             ir.set_instruction(word)
+    #             ir.decode()
+    ir.set_instruction(11042)
+    ir.decode()
 
 
                 
