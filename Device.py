@@ -5,9 +5,13 @@ class Device:
         self.keyboard = list()
 
     def set_keyboard(self, val):
-        if isinstance(val,str):
-            val = ord(val)
-        self.keyboard.append(val)
+        if isinstance(val, str):
+            for i in range(len(val)):
+                if val[i] == '.':
+                    continue
+                self.keyboard.append(ord(val[i]))
+        else:
+            self.keyboard.append(val)
 
     def get_keyboard(self):
         if len(self.keyboard) != 0:

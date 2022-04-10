@@ -594,7 +594,7 @@ class CPU:
         elif opcode == 3:
             return self.LDA(operand, index_register, mode, general_register)
         elif opcode == 33:
-            return self.LDX(operand, index_register, mode, general_register)
+            return self.LDX_mod(operand, index_register, mode, general_register)
         elif opcode == 34:
             return self.STX(operand, index_register, mode, general_register)
         elif opcode == 4:

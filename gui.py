@@ -55,9 +55,9 @@ frameswitches.grid(row=9, column=0, columnspan=5, padx=50, pady=10)
 frameregister = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameregister.grid(row=0, column=0)
 frameoperation = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-frameoperation.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
+frameoperation.grid(row=8, column=6, columnspan=1, padx=50, pady=10)
 framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-framerun.grid(row=9, column=8, columnspan=1, padx=100, pady=10)
+framerun.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
 # framerun.grid(row=10, column=6, columnspan=1, padx=100, pady=10)
 
 
@@ -664,19 +664,32 @@ def LD_MBR():
 
 
 def LD_KB():
-    cpu.Device.set_keyboard(int(Keyboard.get()))
-    log = "User Input (20 numbers): \n"
-    for i in range(len(cpu.Device.keyboard)):
-        if i == 20:
-            log = log + '\n\n' + 'Target Number: ' + str(cpu.Device.keyboard[i]) + "\n"
-            continue
-        log = log + str(cpu.Device.keyboard[i]) + ' '
-    log += '\n'
+    input_s = Keyboard.get()
+    cpu.Device.set_keyboard(input_s)
+    if isinstance(input_s, str):
+        sentences = input_s.split('.')
+        log = "User Input (6 sentences): \n"
+        for i in range(len(sentences)):
+            log = log + str(sentences[i]) + '\n'
+        log += '\n'
+    else:
+        log = "User Input (20 numbers): \n"
+        for i in range(len(cpu.Device.keyboard)):
+            if i == 20:
+                log = log + '\n\n' + 'Target Number: ' + str(cpu.Device.keyboard[i]) + "\n"
+                continue
+            log = log + str(cpu.Device.keyboard[i]) + ' '
+        log += '\n'
+
     ConsoleLog.delete("1.0", END)
     ConsoleLog.insert(END, log)
     return
 
 def LD_TW():
+    target_w = Target.get()
+    cpu.Device.set_keyboard(target_w)
+    log = '\n\n' + 'Target Word: ' + str(target_w) + "\n"
+    ConsoleLog.insert(END, log)
     pass
 
 
@@ -857,6 +870,10 @@ def init():
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
     if 'program1' or 'ipl2' in str(filename).lower():
+        cpu.IndexRegisters[0].set_val(10)
+        cpu.IndexRegisters[1].set_val(100)
+        cpu.IndexRegisters[2].set_val(1000)
+    elif 'program2' in str(filename).lower():
         cpu.IndexRegisters[0].set_val(0)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
@@ -891,7 +908,7 @@ Init = Button(frameoperation, text="Init", command=init)
 SS = Button(framerun, text="SS", command=singlestep)
 Run = Button(framerun, text="Run", command=run)
 # Empty3 = Label(frameoperation).grid(row=17)
-Program2 = Button(frameoperation, text="Program2", command=program2)
+# Program2 = Button(frameoperation, text="Program2", command=program2)
 
 # Initializing Halt and Run Light
 HaltLabel = Label(framerun, text="Halt")
@@ -916,7 +933,7 @@ StorePlus.grid(row=9, column=8)
 Load.grid(row=9, column=9)
 Init.grid(row=9, column=10)
 SS.grid(row=2, column=0)
-Program2.grid(row=9, column=11)
+# Program2.grid(row=9, column=11)
 
 Run.grid(row=2, column=3)
 # Cache.grid(row=1, column=7)
