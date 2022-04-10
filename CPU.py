@@ -15,7 +15,7 @@ class CPU:
 
     # initializes all components, 4 General Registers, 3 Index Registers
     def __init__(self, memsize=2048):
-        self.PC = PC(0)  # starting addr from IPL.txt
+        self.PC = PC(6)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
         self.MAR = MAR()
@@ -30,7 +30,7 @@ class CPU:
 
     # resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
-        self.PC = PC(7)  # starting addr from IPL.txt
+        self.PC = PC(6)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
         self.MAR = MAR()
@@ -576,6 +576,8 @@ class CPU:
             return self.IN(operand, index_register, mode, general_register)
         elif opcode == 50:
             return self.OUT(operand, index_register, mode, general_register)
+        elif opcode == 24:
+            return self.TRAP(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.
@@ -641,6 +643,8 @@ class CPU:
             return self.IN(operand, index_register, mode, general_register)
         elif opcode == 50:
             return self.OUT(operand, index_register, mode, general_register)
+        elif opcode == 24:
+            return self.TRAP(operand, index_register, mode, general_register)
         elif opcode == 0:
             return self.HALT()
         # Illegal opcode.

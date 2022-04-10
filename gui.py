@@ -55,9 +55,9 @@ frameswitches.grid(row=9, column=0, columnspan=5, padx=50, pady=10)
 frameregister = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameregister.grid(row=0, column=0)
 frameoperation = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-frameoperation.grid(row=8, column=6, columnspan=1, padx=50, pady=10)
+frameoperation.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
 framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-framerun.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
+framerun.grid(row=9, column=8, columnspan=1, padx=100, pady=10)
 # framerun.grid(row=10, column=6, columnspan=1, padx=100, pady=10)
 
 
