@@ -423,7 +423,20 @@ class CPU:
             pass
         self.PC.increment_addr()
 
-    def TRAP(self, operand, index_register, mode, trap_code):
+    def CHK(self, dev_id, index_register, mode, general_register):
+        # devid = operand
+        if dev_id == 0:  # Console Keyboard
+            self.GRs[general_register].set_val(1)
+        elif dev_id == 1: # Console Printer
+            self.GRs[general_register].set_val(1)
+        elif dev_id == 2: # Card Reader
+            self.GRs[general_register].set_val(1)
+        else:
+            pass
+        self.PC.increment_addr()
+
+    def TRAP(self, operand, index_register, mode, general_register):
+        trap_code = binary_string_to_decimal(decimal_to_binary(operand, 5)[1:])
         if trap_code > 15 or trap_code < 0:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:2] + '1' + bits[3:]
@@ -434,12 +447,12 @@ class CPU:
         self.MBR.set_val(self.PC.get_addr() + 1)
         self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
 
-        #gets address of trap table 
+        #gets address of trap table
         self.MAR.set_val(0)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         table_addr = self.MBR.get_val()
 
-        #set PC to mapped rountine from trap table
+        #set PC to mapped routine from trap table
         self.MAR.set_val(trap_code + table_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         routine = self.MBR.get_val()

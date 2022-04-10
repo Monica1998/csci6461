@@ -688,7 +688,7 @@ def LD_KB():
 def LD_TW():
     target_w = Target.get()
     cpu.Device.set_keyboard(target_w)
-    log = '\n\n' + 'Target Word: ' + str(target_w) + "\n"
+    log = '\n\n' + 'Target Word: ' + str(target_w) + "\n\n\n"
     ConsoleLog.insert(END, log)
     pass
 

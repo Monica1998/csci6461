@@ -7,8 +7,8 @@ class Device:
     def set_keyboard(self, val):
         if isinstance(val, str):
             for i in range(len(val)):
-                if val[i] == '.':
-                    continue
+                # if val[i] == '.':
+                #     continue
                 self.keyboard.append(ord(val[i]))
         else:
             self.keyboard.append(val)
