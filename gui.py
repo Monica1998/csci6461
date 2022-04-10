@@ -56,8 +56,8 @@ frameregister = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameregister.grid(row=0, column=0)
 frameoperation = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameoperation.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
-framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-framerun.grid(row=9, column=8, columnspan=1, padx=100, pady=10)
+# framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
+# framerun.grid(row=9, column=7, columnspan=1, padx=100, pady=10)
 # framerun.grid(row=10, column=6, columnspan=1, padx=100, pady=10)
 
 
@@ -905,17 +905,17 @@ Store = Button(frameoperation, text="Store", command=store)
 StorePlus = Button(frameoperation, text="St+", command=storeplus)
 Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
-SS = Button(framerun, text="SS", command=singlestep)
-Run = Button(framerun, text="Run", command=run)
+SS = Button(frameoperation, text="SS", command=singlestep)
+Run = Button(frameoperation, text="Run", command=run)
 # Empty3 = Label(frameoperation).grid(row=17)
 # Program2 = Button(frameoperation, text="Program2", command=program2)
 
 # Initializing Halt and Run Light
-HaltLabel = Label(framerun, text="Halt")
-RunLabel = Label(framerun, text="Run")
-SpaceSSRUN = Label(framerun, text="          ")
-RunLight = Entry(framerun, width=1, borderwidth=1)
-HaltLight = Entry(framerun, width=1, borderwidth=1)
+HaltLabel = Label(frameoperation, text="Halt")
+RunLabel = Label(frameoperation, text="Run")
+SpaceSSRUN = Label(frameoperation, text="          ")
+RunLight = Entry(frameoperation, width=1, borderwidth=1)
+HaltLight = Entry(frameoperation, width=1, borderwidth=1)
 
 # Setting both to zero, change to be implemented based on further function
 RunLight.insert(0, "0")
@@ -924,18 +924,18 @@ HaltLight.insert(0, "0")
 # Placing Run and Halt labels and lights on the grid
 HaltLabel.grid(row=9, column=4)
 RunLabel.grid(row=9, column=5)
-HaltLight.grid(row=2, column=4)
-RunLight.grid(row=2, column=5)
+HaltLight.grid(row=8, column=4)
+RunLight.grid(row=8, column=5)
 
 # Placing operation buttons on the grid
-Store.grid(row=9, column=7)
-StorePlus.grid(row=9, column=8)
-Load.grid(row=9, column=9)
-Init.grid(row=9, column=10)
-SS.grid(row=2, column=0)
+Store.grid(row=10, column=2)
+StorePlus.grid(row=10, column=3)
+Load.grid(row=10, column=4)
+Init.grid(row=10, column=5)
+SS.grid(row=10, column=0)
 # Program2.grid(row=9, column=11)
 
-Run.grid(row=2, column=3)
+Run.grid(row=10, column=3)
 # Cache.grid(row=1, column=7)
 
 
