@@ -22,8 +22,8 @@ class Memory:
                 # convert hex to interger and store at this index, the value should be integer?
                 addr = hex_to_decimal(addr)
                 val = hex_to_decimal(val)
-                addr += 6
-                val += 6
+                addr += 7
+                val += 7
 
                 # if val >= 2**6: #we assumed the address space is the integer space
                 #     self.instructions[addr] = val

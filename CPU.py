@@ -15,7 +15,7 @@ class CPU:
 
     # initializes all components, 4 General Registers, 3 Index Registers
     def __init__(self, memsize=2048):
-        self.PC = PC(6)  # starting addr from IPL.txt
+        self.PC = PC(7)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
         self.MAR = MAR()
