@@ -7,8 +7,8 @@ from tkinter import filedialog as fd
 gui = Tk()
 gui.title("Assemble Simulator")
 
-
 cpu = CPU(2048)
+program_flag = 0
 opdict = {
     0: 'HLT',
     24: 'TRAP',
@@ -685,6 +685,7 @@ def LD_KB():
     ConsoleLog.insert(END, log)
     return
 
+
 def LD_TW():
     target_w = Target.get()
     cpu.Device.set_keyboard(target_w + ' ')
@@ -763,8 +764,8 @@ def reset():
     IR.insert(0, "0000000000000000")
     MFR.insert(0, "0000")
     Privileged.insert(0, "0")
-    #Cache.delete("1.0", END)
-    #ConsoleLog.delete("1.0", END)
+    # Cache.delete("1.0", END)
+    # ConsoleLog.delete("1.0", END)
     cpu.reset()
 
 
@@ -792,7 +793,8 @@ def storeplus():
 
 # fetches address from Program Counter and executes corresponding instruction
 def singlestep():
-    cpu.MAR.set_val(cpu.PC.get_addr()) #should be 7??
+    global program_flag
+    cpu.MAR.set_val(cpu.PC.get_addr())
     # cpu.PC.increment_addr()  # points to next instruction
     addr = cpu.MAR.get_val()
     cpu.MBR.set_val(cpu.Memory.words[addr])
@@ -808,6 +810,16 @@ def singlestep():
                   "Address(" + str(operand) + ") \n"
     # HALT
     if code == -1:
+        if program_flag == 2:
+            element = cpu.Device.get_printer()
+            if element == 0 or element is None:
+                log = "The target word is not found.\n"
+            else:
+                log = "Sentence #: " + str(cpu.Device.get_printer()) + \
+                      ", Word #: " + str(cpu.Device.get_printer()) + "\n"
+                # log = "Sentence #: " + cpu.Cache.get_word(1017) + \
+                #       ", Word #: " + cpu.Cache.get_word(1016) + "\n"
+            Printer.insert(0, str(log))
         HaltLight.delete(0, END)
         HaltLight.insert(0, str(1))
         reset()
@@ -840,12 +852,18 @@ def singlestep():
                             + str(mem_add) + '\t    ' \
                             + str(block[i][1]) + '\n'
             cache_index += 1
+
+        if opcode == 50:
+            if program_flag == 1:
+                Printer.insert(0, str(cpu.Device.get_printer()))
+
         Cache.delete("1.0", END)
         Cache.insert(END, cache_log)
         ConsoleLog.insert(END, console_log)
 
-        if opcode == 50:
-            Printer.insert(0, str(cpu.Device.get_printer()))
+
+
+
 
     # Fault situation - TODO: handle each fault situation rather than HALT() the program (prj3).
     else:
@@ -864,33 +882,43 @@ def singlestep():
 
 
 def run():
+    global program_flag
     while 1:
         code = singlestep()
         gui.update()
         # time.sleep(1)
         if code == -1:
+            # if program_flag == 2:
+            #     element = cpu.Device.get_printer()
+            #     if element == 0 or element is None:
+            #         log = "The target word is not found.\n"
+            #     else:
+            #         log = "Sentence #: " + str(cpu.Device.get_printer()) + \
+            #               ", Word #: " + str(cpu.Device.get_printer()) + "\n"
+            #     Printer.insert(0, str(log))
             return
 
 
 def init():
+    global program_flag
     filename = fd.askopenfilenames()
     reset()
+    Printer.delete(0, END)
     Cache.delete("1.0", END)
     ConsoleLog.delete("1.0", END)
     HaltLight.delete(0, END)
     HaltLight.insert(0, str(0))
     cpu.Memory.read_mem(filename[0])
-    if 'program1' or 'ipl2' in str(filename).lower():
+    if 'program1' in str(filename).lower() or 'ipl2' in str(filename).lower():
+        program_flag = 1
         cpu.IndexRegisters[0].set_val(10)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
-    elif 'program2' or 'program2_mod' in str(filename).lower():
+    elif 'program2' in str(filename).lower() or 'program2_mod' in str(filename).lower():
+        program_flag = 2
         cpu.IndexRegisters[0].set_val(0)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
-
-def program2():
-    filename2 = fd.askopenfilenames()
 
 
 # Place the LD buttons in the grid
@@ -916,17 +944,17 @@ Store = Button(frameoperation, text="Store", command=store)
 StorePlus = Button(frameoperation, text="St+", command=storeplus)
 Load = Button(frameoperation, text="Load", command=Load)
 Init = Button(frameoperation, text="Init", command=init)
-SS = Button(framerun, text="SS", command=singlestep)
-Run = Button(framerun, text="Run", command=run)
+SS = Button(frameoperation, text="SS", command=singlestep)
+Run = Button(frameoperation, text="Run", command=run)
 # Empty3 = Label(frameoperation).grid(row=17)
 # Program2 = Button(frameoperation, text="Program2", command=program2)
 
 # Initializing Halt and Run Light
-HaltLabel = Label(framerun, text="Halt")
-RunLabel = Label(framerun, text="Run")
-SpaceSSRUN = Label(framerun, text="          ")
-RunLight = Entry(framerun, width=1, borderwidth=1)
-HaltLight = Entry(framerun, width=1, borderwidth=1)
+HaltLabel = Label(frameoperation, text="Halt")
+RunLabel = Label(frameoperation, text="Run")
+SpaceSSRUN = Label(frameoperation, text="          ")
+RunLight = Entry(frameoperation, width=1, borderwidth=1)
+HaltLight = Entry(frameoperation, width=1, borderwidth=1)
 
 # Setting both to zero, change to be implemented based on further function
 RunLight.insert(0, "0")
@@ -935,18 +963,18 @@ HaltLight.insert(0, "0")
 # Placing Run and Halt labels and lights on the grid
 HaltLabel.grid(row=9, column=4)
 RunLabel.grid(row=9, column=5)
-HaltLight.grid(row=2, column=4)
-RunLight.grid(row=2, column=5)
+HaltLight.grid(row=8, column=4)
+RunLight.grid(row=8, column=5)
 
 # Placing operation buttons on the grid
-Store.grid(row=9, column=7)
-StorePlus.grid(row=9, column=8)
-Load.grid(row=9, column=9)
-Init.grid(row=9, column=10)
-SS.grid(row=2, column=0)
+Store.grid(row=10, column=2)
+StorePlus.grid(row=10, column=3)
+Load.grid(row=10, column=4)
+Init.grid(row=10, column=5)
+SS.grid(row=10, column=0)
 # Program2.grid(row=9, column=11)
 
-Run.grid(row=2, column=3)
+Run.grid(row=10, column=3)
 # Cache.grid(row=1, column=7)
 
 
