@@ -243,6 +243,7 @@ class CPU:
         # immed = operand
         self.CC.set_val(0)
         if operand == 0:
+            self.PC.increment_addr()
             return
         if self.GRs[general_register].get_val() == 0:
             self.GRs[general_register].set_val(operand)

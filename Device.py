@@ -1,14 +1,12 @@
 class Device:
 
     def __init__(self):
-        self.printer = 0
+        self.printer = list()
         self.keyboard = list()
 
     def set_keyboard(self, val):
         if isinstance(val, str):
             for i in range(len(val)):
-                if val[i] == '.':
-                    continue
                 self.keyboard.append(ord(val[i]))
         else:
             self.keyboard.append(val)
@@ -18,10 +16,11 @@ class Device:
             return self.keyboard.pop(0)
 
     def set_printer(self, val):
-        self.printer = val
+        self.printer.append(val)
 
     def get_printer(self):
-        return self.printer
+        if len(self.printer) != 0:
+            return self.printer.pop(0)
 
 if __name__ == '__main__':
     d = Device()
