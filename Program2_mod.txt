@@ -1,93 +1,93 @@
-0133 85CE #start of Trap 1, #LDX IR1 <- mem[1014], which should hold 207, address of trap table
-0134 8540 #LDX IR1 <- mem[IR1 + 0] = accesses trap table to get tvt[207] = 307, which address of TRAP 1
-0135 04C9 #LDR R0 <- mem[1009] = ascii code for '.' denoting end of setence 
-0136 07CB #LDR R3 <- mem[1011] = 6 = total number of sentences
-0137 06C8 #LDR R2 <- mem[1008] = 1107 = address2 = address of the end of the 6 setences NOTE, this will iterate as we read in sentences
-0138 1A01 #AIR 1 R2 = add 1 to R2, iterate address2 pointer for next char to read in
-0139 0AC8 #STR R2 -> mem[1008], stores address2 at static location
-013A C500 #IN R1 <- devid(0) = read in from keyboard, denoting the first character from the paragraph, implies ASCII representation
-013B 09E8 #STR R1 -> EA = c(1008) = stores one letter at the current address2
-013C 4840 #TRR r(0) r(1) --> tests equality to see if current char is '.'
-013D 2B4C #JCC cc(3) if true then use IR1 = 307 to jump to 319 to process end of setence
-013E 2C44 #JMA else jump to start of TRAP1 to process next character within a setence
-013F 3B44 #SOB R3 to mem[310], decrements sentence counter, then branch to read next character if there exists another setence
-0140 2C08 #JMA, end of TRAP 1, 
-0197 85CE #LDX IR1 <- mem[1014], IR1 now is 207, start of TRAP 2: read in target word
-0198 8541 #LDX IR1 <- mem[208], IR1 is now 407
-0199 04CA #LDR R0 <- mem[1010], load \t ascii code, denoting space == end of word
-019A 06CD #LDR R2 <- mem[1013] #loads address4, increments to hold end char of target word
-019B C500 #IN R1 <- devid(0), read first char in from device
-019C 1A01 #AIR 1 to R2, increments address4 to hold next character
-019D 0ACD #STR R2 -> mem[1013] = store new address into mem[1013]
-019E 09ED #STR R1 -> EA = c(1013) = stores contents of R1 into address4
-019F 4840 #TRR R0 R1, sets cc code, comparing read in data to \t to denote end of target word
-01A0 2B09 #JCC end of TRAP 2 if true 
-01A1 2C44 #JMA IR1 + 4 = 411 = if not equal go to 411 which fetches next char
+0133 85CE
+0134 8547
+0135 04C9
+0136 06C8
+0137 07CB
+0138 C507
+0139 09E8
+013A 1A08
+013B 0AC8
+013C 4847
+013D 2B53
+013E 2C4C
+013F 3B4C
+0140 2C22 #JMA, end of TRAP 1
+0197 85CE
+0198 8548
+0199 04CA
+019A 06CD
+019B C507
+019C 09ED
+019D 1A08
+019E 0ACD
+019F 4847
+01A0 2B22 #JCC end of TRAP 2 if true 
+01A1 2C4B
 0000 00CF #address of trap table, 207
 0001 0000 #reserved for MFR
 0002 0000 #reserved for PC store in trap instruction
-0007 6000 #start of program, TRAP 1
-0008 6001 # TRAP to TRAP 2
-0009 06CA #LDR R2 <- mem[1010], load \t (space), start of comparison processes
-000A 07C9 #LDR R3 <- mem[1009], loads '.'
-000B 04D0 #LDR R0 <- mem[1016], loads pointer2, points to char in paragraph
-000C 1801 #AIR to R0, pointer2 += 1, iterator pointer to point to next char
-000D 08D0 #STR R0 -> mem[1016], stores pointer2 into memory
-000E 05F0 #LDR R1 <- EA = c(1016), gets value from pointer2, denoting character ASCII
-000F 4980 #TRR R1 R2, checks to see if current value is a space
-0010 2B87 #JCC to 107 (006B) if true, starts branch1 to start comparison of char and increment word counter, but wait isn't IR1 407 at this point? 
-0011 49C7 #TRR R1 R3 to check if current char is '.'
-0012 2B8B #JCC to 111 (006F) if true to iterate sentence count
-0013 04EF #LDR R0 EA = c(1015), loads contents of pointer1, points to char in target word
-0014 05F0 #LDR R1 EA = c(1016), loads contents of pointer2, points to char in paragraph
-0015 4847 #TRR R1 R0, checks to see if char is the same between target and paragraph
-0016 2B1E #JCC to 30(001E) if true
-0017 04CC #LDR R0 <- mem[1012], loads address3 of target word
-0018 08CF #STR R0 -> mem[1015], stores address in pointer1
-0019 04D0 #LDR R0 <- mem[1016], loads pointer 2
-001A 05C8 #LDR R1 <- mem[1008], loads address2, end of paragraph
-001B 4840 #TRR R0 R1, checks if pointer 2 has reached end of paragraph
-001C 2B98 #JCC to 124 if true
-001D 2C0B #JMA to 11(000B) to get next char in paragraph
-001E 04CF #start of processing matched char, LDR R0 <- mem[1015], loads pointer1
-001F 1821 #AIR R0 1, iterater pointer1 to point to next char in target 
-0020 08CF #STR R0 -> mem[1015], stores pointer1
-0021 05CD #LDR R1 <- mem[1013], loads address4, holding end of target word
-0022 4847 #TRR R0 R1, compares if pointer now points to end of target word
-0023 2B91 #JCC to 117 (0075) to output match result
-0024 2C19 #JMA to 25(0019) if we haven't fully met equality 
-006B 05D1 #start of word counter, LDR R1 <- mem[1017], loads counter starts at 1
-006C 1901 #AIR R1 1, iterates word counter
-006D 09D1 #STR R1 -> mem[1017], stores new word counter
-006E 2C0B #JMA back to 11 (000B) to check if end of setence
-006F 05D2 #branch 2, LDR R1 <- mem[1018], load sentence number
-0070 1901 #AIR 1 to R1, iterate sentence number
-0071 09D2 #STR R1 -> mem[1018], stores new sentence number
-0072 05D4 #LDR R1 <- mem[1020], loads 1 (match succeeded flag)
-0073 09D1 #STR R1 -> mem[1017], resets word count to 1
-0074 2C19 #JMA back to 25 (0019) to see if we've reached end of paragraph
-0075 04D4 #branch 3, success, LDR R0 <- mem[1020], loads match success flag
-0076 05D2 #LDR R1 <- mem[1018], loads current setence number
-0077 06D1 #LDR R2 <- mem[1017], loads current word number 
-0078 C801 #OUT R0 -> devid(1), pushes match succeeded flag
-0079 C901 #OUT R1 -> devid(1), pushes sentence number
-007A CA01 #OUT R2 -> devid(1), pushes word number
+0007 6007 #start of program, TRAP 1
+0008 6008 # TRAP to TRAP 2
+0009 06CA
+000A 07C9
+000B 04D0
+000C 1808
+000D 08D0
+000E 05F0
+000F 4987
+0010 2B87
+0011 49C7
+0012 2B8B
+0013 04EF
+0014 05F0
+0015 4847
+0016 2B1E
+0017 04CC
+0018 08CF
+0019 04D0
+001A 05C8
+001B 4847
+001C 2B98
+001D 2C0B
+001E 04CF
+001F 1828
+0020 08CF
+0021 05CD
+0022 4847
+0023 2B91
+0024 2C19
+006B 05D1
+006C 1908
+006D 09D1
+006E 2C11
+006F 05D2
+0070 1908
+0071 09D2
+0072 05D4
+0073 09D1
+0074 2C11
+0075 04D4
+0076 05D2
+0077 06D1
+0078 C808
+0079 C908
+007A CA08
 007B 0000 #HALT
 007C 04D3
-007D C801 #OUT R0 -> devid(1), pushes match failed flag
-007E 0000 #HALT
+007D C808
+007E 0000
 00CF 0133
 00D0 0197
-03EF 0453 #address1, start of 6 setences
-03F0 0452 #address2, end of 6 sentences
+03EF 0453
+03F0 0453
 03F1 002E #holds ascii code for '.'
 03F2 0020 #holds \t ASCII code, denoting a space
 03F3 0006 #holds sentence number 
-03F4 07D7 #address3 start of target word
-03F5 07D6 #address4, end of target word, note this starts behind
+03F4 07D7
+03F5 07D7
 03F6 00CF
-03F7 07D7 #pointer1 holds address3, which is start of target word
-03F8 0452 #pointer2, stores starting address of 6 setences, note that it is 1 bebhind address1
+03F7 07D7
+03F8 0452
 03F9 0001 #stores word number
 03FA 0001 #stores setence number 
 03FB 0000 #match failed
