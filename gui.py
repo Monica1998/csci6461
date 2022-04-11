@@ -687,7 +687,7 @@ def LD_KB():
 
 def LD_TW():
     target_w = Target.get()
-    cpu.Device.set_keyboard(target_w)
+    cpu.Device.set_keyboard(target_w + ' ')
     log = '\n\n' + 'Target Word: ' + str(target_w) + "\n"
     ConsoleLog.insert(END, log)
     pass
@@ -709,19 +709,30 @@ def show_general_register(general_register):
             GPR3.insert(0, str(decimal_to_binary(cpu.GRs[3].get_val())))
 
 
+# def show_index_register(index_register):
+#     match index_register:
+#         case 0:
+#             pass
+#         case 1:
+#             IXR1.delete(0, END)
+#             IXR1.insert(0, str(decimal_to_binary(cpu.IndexRegisters[0].get_val())))
+#         case 2:
+#             IXR2.delete(0, END)
+#             IXR2.insert(0, str(decimal_to_binary(cpu.IndexRegisters[1].get_val())))
+#         case 3:
+#             IXR3.delete(0, END)
+#             IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
+
 def show_index_register(index_register):
-    match index_register:
-        case 0:
-            pass
-        case 1:
-            IXR1.delete(0, END)
-            IXR1.insert(0, str(decimal_to_binary(cpu.IndexRegisters[0].get_val())))
-        case 2:
-            IXR2.delete(0, END)
-            IXR2.insert(0, str(decimal_to_binary(cpu.IndexRegisters[1].get_val())))
-        case 3:
-            IXR3.delete(0, END)
-            IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
+    IXR1.delete(0, END)
+    IXR1.insert(0, str(decimal_to_binary(cpu.IndexRegisters[0].get_val())))
+
+    IXR2.delete(0, END)
+    IXR2.insert(0, str(decimal_to_binary(cpu.IndexRegisters[1].get_val())))
+
+    IXR3.delete(0, END)
+    IXR3.insert(0, str(decimal_to_binary(cpu.IndexRegisters[2].get_val())))
+ 
 
 
 def reset():
@@ -781,7 +792,7 @@ def storeplus():
 
 # fetches address from Program Counter and executes corresponding instruction
 def singlestep():
-    cpu.MAR.set_val(cpu.PC.get_addr())
+    cpu.MAR.set_val(cpu.PC.get_addr()) #should be 7??
     # cpu.PC.increment_addr()  # points to next instruction
     addr = cpu.MAR.get_val()
     cpu.MBR.set_val(cpu.Memory.words[addr])
@@ -873,7 +884,7 @@ def init():
         cpu.IndexRegisters[0].set_val(10)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)
-    elif 'program2' in str(filename).lower():
+    elif 'program2' or 'program2_mod' in str(filename).lower():
         cpu.IndexRegisters[0].set_val(0)
         cpu.IndexRegisters[1].set_val(100)
         cpu.IndexRegisters[2].set_val(1000)

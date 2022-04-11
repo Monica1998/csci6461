@@ -30,7 +30,7 @@ class CPU:
 
     # resets all registers and program counter to default values when hitting HALT instruction
     def reset(self):
-        self.PC = PC(6)  # starting addr from IPL.txt
+        self.PC = PC(7)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
         self.MAR = MAR()
@@ -139,6 +139,7 @@ class CPU:
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
+        print(effective_addr )
         self.MAR.set_val(effective_addr)
         self.PC.set_addr(effective_addr)
 
@@ -243,7 +244,7 @@ class CPU:
         self.CC.set_val(0)
         if operand == 0:
             return
-        if general_register == 0:
+        if self.GRs[general_register].get_val() == 0:
             self.GRs[general_register].set_val(operand)
         else:
             result = self.GRs[general_register].get_val() + operand
@@ -340,7 +341,7 @@ class CPU:
     def TRR(self, operand, ry, mode, rx):
         # rx = general_register, ry = index_register
         self.CC.set_val(0)
-        if self.GRs[rx] == self.GRs[ry]:
+        if self.GRs[rx].get_val() == self.GRs[ry].get_val():
             bits = decimal_to_binary(self.CC.get_val(), bit=4)
             bits = bits[:3] + '1'
             self.CC.set_val(binary_string_to_decimal(bits))
@@ -423,7 +424,7 @@ class CPU:
             pass
         self.PC.increment_addr()
 
-    def TRAP(self, operand, index_register, mode, trap_code):
+    def TRAP(self, trap_code, index_register, mode, general_register):
         if trap_code > 15 or trap_code < 0:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:2] + '1' + bits[3:]
@@ -485,6 +486,8 @@ class CPU:
     # validates effective address does not violate memory constraints
     def check_addr(self, addr):
         # Reserved memory location.
+        
+
         if 0 <= addr < 6:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
             bits = bits[:3] + '1'
@@ -589,6 +592,8 @@ class CPU:
 
     # function to execute single instruction after being decoded
     def single_step(self, opcode, operand, index_register, mode, general_register):
+        if self.PC.get_addr() > 9 and self.PC.get_addr() < 126:
+            print(self.PC.get_addr())
         if opcode == 1:
             return self.LDR(operand, index_register, mode, general_register)
         elif opcode == 2:
