@@ -1,15 +1,19 @@
 from Device import Device
 from PC import ProgramCounter as PC
-from converter import decimal_to_binary, binary_string_to_decimal
-from registers import MAR, MBR, MFR, CC, IR, IndexRegister, GeneralRegister as GR
+#from converter import decimal_to_binary, binary_string_to_decimal
+from registers import MAR, MBR, MFR, CC, IR, IndexRegister, FR, GeneralRegister as GR
 from Memory import Memory
 from cache import Cache
+from converter import *
 
 MAX_VALUE = 65536
 MIN_VALUE = 0
 OVERFLOW = 0
 UNDERFLOW = 1
-
+MAX_WHOLE_FP = int('111111111' + (55 * '0'),2)
+MIN_WHOLE_FP = -1 * MAX_WHOLE_FP
+MAX_DEC_FP = 5.42101086e-20
+MIN_DEC_FP = -1 * MAX_DEC_FP
 
 class CPU:
 
@@ -18,6 +22,7 @@ class CPU:
         self.PC = PC(7)  # starting addr from IPL.txt
         self.GRs = [GR() for i in range(4)]
         self.IndexRegisters = [IndexRegister(0) for i in range(3)]
+        self.FRs = [FR(0) for i in range(2)]
         self.MAR = MAR()
         self.MBR = MBR()
         self.MFR = MFR()
@@ -87,6 +92,32 @@ class CPU:
         #self.MBR.set_val(self.Memory.words[effective_addr])
         self.MBR.set_val(self.Cache.get_word(effective_addr))
         self.IndexRegisters[general_register - 1].set_val(self.MBR.get_val())
+        self.PC.increment_addr()
+
+    def LDFR(self, operand, index_register, mode, floating_register):
+        effective_addr = self.get_effective_addr(operand, 0, 0)
+
+        if mode == 1:
+            effective_addr += 1
+
+        if effective_addr == -1:
+            return
+        self.MAR.set_val(effective_addr)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        self.FRs[floating_register].set_val(self.MBR.get_val())
+        self.PC.increment_addr()
+
+    def STFR(self, operand, index_register, mode, floating_register):
+        effective_addr = self.get_effective_addr(operand, 0, 0)
+
+        if mode == 1:
+            effective_addr += 1
+            
+        if effective_addr == -1:
+            return
+        self.MBR.set_val(self.FRs[floating_register].get_val())
+        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        self.Cache.set_word(effective_addr, self.MBR.get_val())
         self.PC.increment_addr()
 
     # store data from index register into memory
@@ -425,6 +456,99 @@ class CPU:
             pass
         self.PC.increment_addr()
 
+
+    def FADD(self, operand, index_register, mode, floating_register):
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return
+        self.MAR.set_val(effective_addr)
+
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        temp = self.MBR.get_val()
+        temp = decimal_to_binary(temp)
+        temp = binary_to_floating(temp)
+
+        #TODO: Implement error handling for incorrect/out of bounds register
+        result = self.FRs[floating_register].get_val() + temp
+
+        # Check overflow.
+        if (result > 1 and result > MAX_WHOLE_FP) or (result < -1 and result < MIN_WHOLE_FP):
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        #check underflow
+        elif (result > 0 and result < MAX_DEC_FP) or (result < 0 and result > MIN_DEC_FP):
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        else:
+            self.FRs[floating_register].set_val(result)
+        self.PC.increment_addr()
+
+    def FSUB(self, operand, index_register, mode, floating_register):
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return
+        self.MAR.set_val(effective_addr)
+
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        temp = self.MBR.get_val()
+        temp = decimal_to_binary(temp)
+        temp = binary_to_floating(temp)
+
+        result = self.FRs[floating_register].get_val() - temp
+
+        # Check overflow.
+        if (result > 1 and result > MAX_WHOLE_FP) or (result < -1 and result < MIN_WHOLE_FP):
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = '1' + bits[1:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        #check underflow
+        elif (result > 0 and result < MAX_DEC_FP) or (result < 0 and result > MIN_DEC_FP):
+            bits = decimal_to_binary(self.CC.get_val(), bit=4)
+            bits = bits[:1] + '1' + bits[2:]
+            self.CC.set_val(binary_string_to_decimal(bits))
+        else:
+            self.FRs[floating_register].set_val(result)
+        self.PC.increment_addr()
+
+
+    #NOTE: we assume <16,7> fixed point representation
+    def CNVRT(self, operand, index_register, mode, general_register):
+        effective_addr = self.get_effective_addr(operand, index_register, mode)
+        if effective_addr == -1:
+            return
+        self.MAR.set_val(effective_addr)
+
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+
+        temp = self.MBR.get_val()
+        temp = decimal_to_binary(temp)
+        
+        #get bit from general register
+        F = self.GRs[general_register].get_val()
+        if F == 0:
+            #convert c(EA) to fixed point, storein general_register
+            temp = binary_to_floating(temp)
+            result = floating_to_fixed(temp, 7)
+            if (result > 1 and result > MAX_WHOLE_FP) or (result < -1 and result < MIN_WHOLE_FP):
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+        #check underflow
+            elif (result > 0 and result < MAX_DEC_FP) or (result < 0 and result > MIN_DEC_FP):
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+            else:
+                self.GRs[general_register].set_val(result)
+        if F == 1: 
+            #concert c(EA) to floating point, store in FR0
+            temp = binary_to_fixed(temp)
+            result = fixed_to_floating(temp)
+            self.FRs[0].set_val(result)
+        self.PC.increment_addr()
+
     def TRAP(self, trap_code, index_register, mode, general_register):
         if trap_code > 15 or trap_code < 0:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
@@ -645,6 +769,16 @@ class CPU:
             return self.SRC(operand, index_register, mode, general_register)
         elif opcode == 26:
             return self.RRC(operand, index_register, mode, general_register)
+        elif opcode == 27:
+            return self.FADD(operand, index_register, mode, general_register)
+        elif opcode == 28:
+            return self.FSUB(operand, index_register, mode, general_register)
+        elif opcode == 40:
+            return self.LDFR(operand, index_register, mode, general_register)
+        elif opcode == 41:
+            return self.STFR(operand, index_register, mode, general_register)
+        elif opcode == 31:
+            return self.CNVRT(operand, index_register, mode, general_register)
         elif opcode == 49:
             return self.IN(operand, index_register, mode, general_register)
         elif opcode == 50:
@@ -664,20 +798,14 @@ class CPU:
 # for testing purposes
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem('IPL2.txt')
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
-    cpu.step()
+    cpu.Memory.read_mem('test_program.txt')
+    cpu.GRs[0].set_val(0)
+    cpu.FRs[0].set_val(6.2)
+    cpu.CNVRT(11, 0, 0, 0)
+    cpu.GRs[0].set_val(1)
+    cpu.CNVRT(12, 0, 0, 0)
+    cpu.LDFR(9, 0, 0, 1)
+
 
 
 if __name__ == '__main__':

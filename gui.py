@@ -709,6 +709,15 @@ def show_general_register(general_register):
             GPR3.delete(0, END)
             GPR3.insert(0, str(decimal_to_binary(cpu.GRs[3].get_val())))
 
+def show_floating_register(floating_register):
+    match floating_register:
+        case 0:
+            FPR0.delete(0, END)
+            FPR0.insert(0, str(decimal_to_binary(cpu.FRs[0].get_val())))
+        case 1:
+            FPR1.delete(0, END)
+            FPR1.insert(0, str(decimal_to_binary(cpu.FRs[1].get_val())))
+            
 
 # def show_index_register(index_register):
 #     match index_register:
@@ -826,6 +835,7 @@ def singlestep():
         return -1
 
     # Normal instruction.
+   
     if cpu.MFR.get_val() == 0:
         PC.delete(0, END)
         PC.insert(0, str(decimal_to_binary(cpu.PC.get_addr(), 12)))
@@ -835,6 +845,8 @@ def singlestep():
         MBR.insert(0, str(decimal_to_binary(cpu.MBR.get_val())))
         MFR.delete(0, END)
         MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
+      
+        show_floating_register(general_register)
         show_general_register(general_register)
         show_index_register(index_register)
         Printer.delete(0, END)

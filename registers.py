@@ -70,6 +70,11 @@ class MFR(Register):
 class CC(Register):
     pass
 
+
+#floating point registers, should be 2, each 16-bit in length
+class FR(Register):
+    pass
+
 #Instruction Register to get, set, and decode instructions 
 class IR():
 

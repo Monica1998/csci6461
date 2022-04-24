@@ -8,7 +8,7 @@
 0133 1A01 #AIR 1 R2 = add 1 to R2, iterate address2 pointer for next char to read in
 0134 0AC1 #STR R2 -> mem[1001], stores address2 at static location
 0135 4840 #TRR r(0) r(1) --> tests equality to see if current char is '.'
-0136 2B4C #JCC cc(3) if true then use IR1 = 300 to jump to 312 to process end of setence
+0136 2B4C #JCC cc(3) if true then use IR1 = 300 to jump to 312 (0138) to process end of setence
 0137 2C45 #JMA else jump to start of TRAP1 to process next character within a setence 
 0138 3B45 #SOB R3 to mem[305], decrements sentence counter, then branch to read next character if there exists another setence 
 0139 2C01 #JMA 1 = else unconditional jump to 1, is SOB fails, we've read in all setences, jump 0001, which holds address to trap table item
@@ -32,13 +32,13 @@
 0006 08C9 #STR R0 -> mem[1009], stores pointer2 into memory
 0007 05E9 #LDR R1 <- EA = c(1009), gets value from pointer2, denoting character ASCII
 0008 4980 #TRR R1 R2, checks to see if current value is a space
-0009 2B80 #JCC to 100 if true, starts branch1 to start comparison of char and increment word counter
+0009 2B80 #JCC to 100 (0064) if true, starts branch1 to start comparison of char and increment word counter
 000A 49C0 #TRR r1 r3, checks if current word is '.' to denote end of setence
-000B 2B84 #JCC c(3) to 104, if true, goes to branch2 to iterate setence counter and reset word counter
+000B 2B84 #JCC c(3) to 104 (0068), if true, goes to branch2 to iterate setence counter and reset word counter
 000C 04E8 #LDR R0 EA = c(1008), load contents from pointer1, pointer to char in target word
 000D 05E9 #LDR R1 EA = c(1009), load contents from pointer2, points to char in paragraph
 000E 4840 #TRR R0 R1, checks if mem[ptr1] == mem[ptr2], checks for equality of chars
-000F 2B17 #JCC to 23, if true
+000F 2B17 #JCC to 23 (0017), if true
 0010 04C5 #LDR R0 <- mem[1005], loads address3, start of target word
 0011 08C8 # STR R0 -> mem[1008], sets pointer1 to address3 
 0012 04C9 # R0 <- mem[1009], loads pointer2
@@ -51,7 +51,7 @@
 0019 08C8 #STR R0 -> mem[1008], stores iterated pointer1
 001A 05C6 #LDR R1 <- mem[1006], load address4, 
 001B 4840 #TRR R0 R1, compares if pointer is pointing to end of target word, meaning we've found equality of word in paragraph
-001C 2B8A #JCC to 110 if c(3) is true to output result 
+001C 2B8A #JCC to 110 (006E) if c(3) is true to output result 
 001D 2C12 #JMA to 18, 0012, if we haven't fully met equality of words, go to 
 0064 05CA #start of branch1, LDR R1 <- mem[1010], loads word number counter, starts at 1
 0065 1901 #AIR 1 to R1, iterates word number

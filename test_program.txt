@@ -1,0 +1,4 @@
+0009 01C0 #3.5 in floating point
+000A 81C0 #-3.5 in floating point
+000B 0330 #9.5156 in floating point
+000C 04C0 #1216 fixed point, should be equal to 9.5 floatin
