@@ -549,8 +549,8 @@ Privileged.insert(0, "0")
 Keyboard.insert(0, "")
 Printer.insert(0, "")
 Target.insert(0, "")
-FR0.insert(0, "")
-FR1.insert(0, "")
+FR0.insert(0, "0000000000000000")
+FR1.insert(0, "0000000000000000")
 
 # Placing Register textboxes
 GPR0.grid(row=0, column=1)
@@ -720,11 +720,11 @@ def show_general_register(general_register):
 def show_floating_register(floating_register):
     match floating_register:
         case 0:
-            FPR0.delete(0, END)
-            FPR0.insert(0, str(decimal_to_binary(cpu.FRs[0].get_val())))
+            FR0.delete(0, END)
+            FR0.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[0].get_val()))))
         case 1:
-            FPR1.delete(0, END)
-            FPR1.insert(0, str(decimal_to_binary(cpu.FRs[1].get_val())))
+            FR1.delete(0, END)
+            FR1.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[1].get_val()))))
 
 def LD_FR0():
     pass
