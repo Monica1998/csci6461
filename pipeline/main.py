@@ -13,7 +13,7 @@ def main():
     EXE_MEM = multiprocessing.Queue()
     MEM_WB = multiprocessing.Queue()
 
-    code = multiprocessing.Value('i', 0)
+    code = multiprocessing.Value('i', 0) #shared code stop all proccesses
 
     class MyManager(BaseManager):
         pass
@@ -21,11 +21,11 @@ def main():
     MyManager.register('CPU', CPU)    
     with MyManager() as manager:
         cpu = manager.CPU()
-        p1 = multiprocessing.Process(target=cpu.fetch, args=(IF_ID,))
-        p2 = multiprocessing.Process(target=cpu.decode, args=(IF_ID, ID_EXE,))
-        p3 = multiprocessing.Process(target=cpu.execute, args=(ID_EXE, EXE_MEM,))
-        p4 = multiprocessing.Process(target=cpu.mem, args=(EXE_MEM, MEM_WB,))
-        p5 = multiprocessing.Process(target=cpu.wb, args=(MEM_WB,))
+        p1 = multiprocessing.Process(target=cpu.fetch, args=(IF_ID,code, ))
+        p2 = multiprocessing.Process(target=cpu.decode, args=(IF_ID, ID_EXE,code, ))
+        p3 = multiprocessing.Process(target=cpu.execute, args=(ID_EXE, EXE_MEM,code, ))
+        p4 = multiprocessing.Process(target=cpu.mem, args=(EXE_MEM, MEM_WB,code, ))
+        p5 = multiprocessing.Process(target=cpu.wb, args=(MEM_WB,code, ))
 
         p1.start()
         p2.start()
@@ -33,12 +33,13 @@ def main():
         p4.start()
         p5.start()
 
+        #blocks until all processes exit
         p1.join()
         p2.join()
         p3.join()
         p4.join()
         p5.join()
 
-        
+
 if __name__ == '__main__':
     main()

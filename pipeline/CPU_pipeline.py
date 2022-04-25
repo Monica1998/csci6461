@@ -36,8 +36,14 @@ class CPU:
         self.exe_ins = (6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26, 49, 50, 24, 0)
 
 
-    def fetch(self, IF_ID):
-        while self.MFR.get_val() == 0:
+    def fetch(self, IF_ID, code):
+        """Gets PC and pushes it to IF_ID buffer, then increments the PC
+
+        Args:
+            IF_ID (Queue): Buffer using Queue data structure to hold instructions fetched from memory
+            code (int): shared integer to denote when to stop execution
+        """
+        while code.value != -1:
             if IF_ID.empty():
                 self.MAR.set_val(self.PC.get_addr())
                 # cpu.PC.increment_addr()  # points to next instruction
@@ -47,15 +53,35 @@ class CPU:
                 IF_ID.put(self.IR.get_instruction())
                 self.PC.increment_addr()
 
-    def decode(self, IF_ID, ID_EXE):
-        while self.MFR.get_val() == 0:
+    def decode(self, IF_ID, ID_EXE, code):
+        """Decodes instruction and determines whether to halt. Sends opcode, operand, index registers, mode, general registers
+        to ID_EXE buffer
+
+        Args:
+            IF_ID (Queue): Buffer that stores the instruction
+            ID_EXE (Queue): Buffer to hold decoded instruction
+            code (int): shared integer to denote when to stop execution
+        """
+        while code.value != -1:
             if IF_ID.empty == False and ID_EXE.empty == True:
                 IF_ID.get() #its already in the IR
                 opcode, operand, index_register, mode, general_register = self.IR.decode() #stage 2
+                if opcode == 0:
+                    code.value = -1 #halt all processes
                 ID_EXE.put((opcode, operand, index_register, mode, general_register))
 
-    def execute(self, ID_EXE, EXE_MEM):
-        while self.MFR.get_val() == 0:
+    def execute(self, ID_EXE, EXE_MEM, code):
+        """Pops decoded instruction from ID_EXE buffer, executes instructions that do not require main memory access.
+        For those that need main memory access, the effective address is computed. 
+        result or effective address along with decoded instruciton is then pushed to EXE_MEM
+        
+
+        Args:
+            ID_EXE (Queue): holds decoded instruction 
+            EXE_MEM (Queue): holds decoded instruction along with result or effective address
+            code (int): shared integer to denote when to stop execution
+        """
+        while code.value != -1:
             if ID_EXE.empty() == False and EXE_MEM.empty() == True:
                 opcode, operand, index_register, mode, general_register = ID_EXE.get()
                 if opcode in self.exe_ins:
@@ -68,8 +94,18 @@ class CPU:
                     EXE_MEM.put((opcode, operand, index_register, mode, general_register, effective_addr))
 
     #TODO: there will likely be conflicts with accessing the MBR, look into locking
-    def mem(self, EXE_MEM, MEM_WB):
-        while self.MFR.get_val() == 0:
+    def mem(self, EXE_MEM, MEM_WB, code):
+        """Pops decoded instruciton and res/effective address from EXE_MEM. 
+        For those instrucitons that need access to main memory, execution is performed here. 
+        The result, if not none,  from these instructions are pushed to MEM_WB. 
+        For those instructions that already executed, pushes res to MEM_WB buffer. 
+
+        Args:
+            EXE_MEM (Queue): holds decoded instruction along with result or effective address
+            MEM_WB (Queue): holds result, which is a dictionary of register, register index, and value  
+            code (int): shared integer to denote when to stop execution
+        """
+        while code.value != -1:
             if EXE_MEM.empty() == False and MEM_WB.empty() == True:
                 opcode, operand, index_register, mode, general_register, data = EXE_MEM.get()
                 if opcode not in self.exe_ins:
@@ -80,8 +116,14 @@ class CPU:
                     MEM_WB.put(data)
 
     #only for writing to GR, IX, FPR from memory
-    def wb(self, MEM_WB):
-        while self.MFR.get_val() == 0:
+    def wb(self, MEM_WB, code):
+        """Pops res dictionary from MEM_WB and writes the result to the corresponding register
+
+        Args:
+            MEM_WB (Queue): holds result, which is a dictionary of register, register index, and value 
+            code (int): shared integer to denote when to stop execution
+        """
+        while code.value != -1:
             if MEM_WB.empty() == False:
                 res = MEM_WB.get()
                 if res['Register'] == 'General':
