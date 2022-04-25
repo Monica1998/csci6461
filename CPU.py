@@ -104,15 +104,17 @@ class CPU:
             return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
-        self.FRs[floating_register].set_val(self.MBR.get_val())
-
-        self.MAR.set_val(effective_addr)
-        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
-        self.FRs[0].set_val(self.MBR.get_val())
+        res = self.MBR.get_val()
+        res = decimal_to_binary(res)
+        res = binary_to_floating(res)
+        self.FRs[0].set_val(res)
 
         self.MAR.set_val(effective_addr+1)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
-        self.FRs[1].set_val(self.MBR.get_val())
+        res = self.MBR.get_val()
+        res = decimal_to_binary(res)
+        res = binary_to_floating(res)
+        self.FRs[1].set_val(res)
 
         self.PC.increment_addr()
 
@@ -121,13 +123,18 @@ class CPU:
 
         if effective_addr == -1:
             return
-            
-        self.MBR.set_val(self.FRs[0].get_val())
+
+        res = self.FRs[0].get_val()
+        res = floating_to_binary(res)
+        res = binary_string_to_decimal(res)
+        self.MBR.set_val(res)
         self.Cache.set_word(effective_addr, self.MBR.get_val())
 
-        self.MBR.set_val(self.FRs[1].get_val())
+        res = self.FRs[1].get_val()
+        res = floating_to_binary(res)
+        res = binary_string_to_decimal(res)
+        self.MBR.set_val(res)
         self.Cache.set_word(effective_addr+1, self.MBR.get_val())
-
 
         self.PC.increment_addr()
 
@@ -547,12 +554,17 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
         #check underflow
             elif (result > 0 and result < MAX_DEC_FP) or (result < 0 and result > MIN_DEC_FP):
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+            else:
                 self.GRs[general_register].set_val(result)
-            if F == 1:
-                # concert c(EA) to floating point, store in FR0
-                temp = binary_to_fixed(temp)
-                result = fixed_to_floating(temp)
-                self.FRs[0].set_val(result)
+        if F == 1:
+            # concert c(EA) to floating point, store in FR0
+            temp = binary_to_fixed(temp)
+            result = fixed_to_floating(temp)
+            self.FRs[0].set_val(result)
+        self.PC.increment_addr()
     def VADD(self, addr_v1, ix, i, fr):
         addr_v2 = addr_v1 + 1
         effective_addr_v1 = self.get_effective_addr(addr_v1, ix, i)
@@ -697,7 +709,7 @@ class CPU:
     # executes one instruction by fetching instruction address from Program Counter
     def step(self):
         self.MAR.set_val(self.PC.get_addr())
-        self.PC.increment_addr()  # points to next instruction
+        #self.PC.increment_addr()  # points to next instruction
 
         addr = self.MAR.get_val()
         # self.MBR.set_val(self.Memory.words[addr])
@@ -757,6 +769,16 @@ class CPU:
             return self.SRC(operand, index_register, mode, general_register)
         elif opcode == 26:
             return self.RRC(operand, index_register, mode, general_register)
+        elif opcode == 27:
+            return self.FADD(operand, index_register, mode, general_register)
+        elif opcode == 28:
+            return self.FSUB(operand, index_register, mode, general_register)
+        elif opcode == 40:
+            return self.LDFR(operand, index_register, mode, general_register)
+        elif opcode == 41:
+            return self.STFR(operand, index_register, mode, general_register)
+        elif opcode == 31:
+            return self.CNVRT(operand, index_register, mode, general_register)
         elif opcode == 29:
             return self.VADD(operand, index_register, mode, general_register)
         elif opcode == 30:
@@ -863,13 +885,16 @@ class CPU:
 # for testing purposes
 def main():
     cpu = CPU(2048)
-    cpu.Memory.read_mem('test_program.txt')
-    cpu.GRs[0].set_val(0)
-    cpu.FRs[0].set_val(6.2)
-    cpu.CNVRT(11, 0, 0, 0)
-    cpu.GRs[0].set_val(1)
-    cpu.CNVRT(12, 0, 0, 0)
-    cpu.LDFR(9, 0, 0, 1)
+    cpu.Memory.read_mem('program3.txt')
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step()
+    cpu.step() #STR
+    cpu.step()
+
+    
 
 if __name__ == '__main__':
     main()

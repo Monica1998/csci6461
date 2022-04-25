@@ -131,7 +131,7 @@ if __name__ == '__main__':
 #     print(temp)
 #   #  print(len(temp))
 #     print(binary_to_floating(temp))
-    temp = fixed_to_binary(1216)
+    temp = floating_to_binary(2.5)
     print(binary_string_to_hex(temp))
     #print(binary_string_to_hex(temp))
     

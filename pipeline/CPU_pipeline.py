@@ -209,10 +209,14 @@ class CPU:
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         res1 = self.MBR.get_val()
+        res1 = decimal_to_binary(res1)
+        res1 = binary_to_floating(res1)
 
         self.MAR.set_val(effective_addr+1)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         res2 = self.MBR.get_val()
+        res2 = decimal_to_binary(res2)
+        res2 = binary_to_floating(res2)
 
         #return self.MBR.get_val()
         return {'Register': 'Floating', 'index': [0,1], 'value': [res1, res2]}
@@ -227,14 +231,18 @@ class CPU:
 
         if effective_addr == -1:
             return
-        self.MBR.set_val(self.FRs[0].get_val())
-        #self.Memory.words[effective_addr] = self.MBR.get_val()
+
+        res = self.FRs[0].get_val()
+        res = floating_to_binary(res)
+        res = binary_string_to_decimal(res)
+        self.MBR.set_val(res)
         self.Cache.set_word(effective_addr, self.MBR.get_val())
 
-        self.MBR.set_val(self.FRs[1].get_val())
-        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        res = self.FRs[1].get_val()
+        res = floating_to_binary(res)
+        res = binary_string_to_decimal(res)
+        self.MBR.set_val(res)
         self.Cache.set_word(effective_addr+1, self.MBR.get_val())
-       # self.PC.increment_addr()
 
     # store data from index register into memory
     def STX(self, operand, index_register, mode, general_register, effective_addr):

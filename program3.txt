@@ -1,0 +1,10 @@
+0007 A019 #LDFR EA = 25,26
+0008 6C1B #FADD F[0] + c(27) = 6.0
+0009 711B #FSUB FR[1] - c(27) = 7.0
+000A 7D1B #CNVRT c(27) to fixed, put in R1
+000B 1801 #AIR R0 <- R0 + 1
+000C 091B #STR R1 -> c(27)
+000D 7C1B #CNVRT c(27) to floating, store in F0
+0019 01C0 #floating point value 3.5, c(25)
+001A 0330 #9.5156 in floating point
+001B 0140 #2.5 in floating point, this is our constant used for FADD, FSUB
