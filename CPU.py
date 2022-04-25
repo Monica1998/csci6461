@@ -565,58 +565,75 @@ class CPU:
             result = fixed_to_floating(temp)
             self.FRs[0].set_val(result)
         self.PC.increment_addr()
-    def VADD(self, addr_v1, ix, i, fr):
-        addr_v2 = addr_v1 + 1
-        effective_addr_v1 = self.get_effective_addr(addr_v1, ix, i)
-        effective_addr_v2 = self.get_effective_addr(addr_v2, ix, i)
-        fr = 3
+
+    def VADD(self, operand, ix, i, floating_register):
+        #addr_v2 = operand + 1
+        effective_addr = self.get_effective_addr(operand, ix, i)
+        #effective_addr_v2 = self.get_effective_addr(operand + 1, ix, i)
+        self.MAR.set_val(effective_addr)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        v1_addr = self.MBR.get_val()
+
+        self.MAR.set_val(effective_addr + 1)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        v2_addr = self.MBR.get_val()
+
+        fr = int(self.FRs[floating_register].get_val())
         for i in range(fr):
-            self.MAR.set_val(effective_addr_v1 + i)
+            self.MAR.set_val(v1_addr + i)
             self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
             v1 = self.MBR.get_val()
-            self.MAR.set_val(effective_addr_v2 + i)
+            self.MAR.set_val(v2_addr + i)
             self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
             v2 = self.MBR.get_val()
             result = v1 + v2
-            if result > 64:
+            if result > MAX_VALUE:
                 bits = decimal_to_binary(self.CC.get_val(), bit=4)
                 bits = '1' + bits[1:]
                 self.CC.set_val(binary_string_to_decimal(bits))
-            elif result < -63:
+            elif result < MIN_VALUE:
                 bits = decimal_to_binary(self.CC.get_val(), bit=4)
                 bits = bits[:1] + '1' + bits[2:]
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.MBR.set_val(result)
-                self.MAR(effective_addr_v1 + i)
-                self.Cache.set_word(self.MAR.get_val(), result)
+                self.MAR.set_val(v1_addr + i)
+                self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
         self.PC.increment_addr()
 
-    def VSUB(self, addr_v1, ix, i, fr):
-        addr_v2 = addr_v1 + 1
-        effective_addr_v1 = self.get_effective_addr(addr_v1, ix, i)
-        effective_addr_v2 = self.get_effective_addr(addr_v2, ix, i)
-        fr = 3
+    def VSUB(self, operand, ix, i, floating_register):
+         #addr_v2 = operand + 1
+        effective_addr = self.get_effective_addr(operand, ix, i)
+        #effective_addr_v2 = self.get_effective_addr(operand + 1, ix, i)
+        self.MAR.set_val(effective_addr)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        v1_addr = self.MBR.get_val()
+
+        self.MAR.set_val(effective_addr + 1)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        v2_addr = self.MBR.get_val()
+
+        fr = int(self.FRs[floating_register].get_val())
         for i in range(fr):
-            self.MAR.set_val(effective_addr_v1 + i)
+            self.MAR.set_val(v1_addr + i)
             self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
             v1 = self.MBR.get_val()
-            self.MAR.set_val(effective_addr_v2 + i)
+            self.MAR.set_val(v2_addr + i)
             self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
             v2 = self.MBR.get_val()
             result = v1 - v2
-            if result > 64:
+            if result > MAX_VALUE:
                 bits = decimal_to_binary(self.CC.get_val(), bit=4)
                 bits = '1' + bits[1:]
                 self.CC.set_val(binary_string_to_decimal(bits))
-            elif result < -63:
+            elif result < MIN_VALUE:
                 bits = decimal_to_binary(self.CC.get_val(), bit=4)
                 bits = bits[:1] + '1' + bits[2:]
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
                 self.MBR.set_val(result)
-                self.MAR(effective_addr_v1 + i)
-                self.Cache.set_word(self.MAR.get_val(), result)
+                self.MAR.set_val(v1_addr + i)
+                self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
         self.PC.increment_addr()
 
     def TRAP(self, trap_code, index_register, mode, general_register):
@@ -889,11 +906,13 @@ def main():
     cpu.step()
     cpu.step()
     cpu.step()
-    cpu.step()
+    cpu.step() #CNVRT
     cpu.step()
     cpu.step() #STR
-    cpu.step()
-
+    cpu.step() #CNVRT
+    cpu.step() #LDFR
+    cpu.step() #VADD
+    cpu.step() #VSUB
     
 
 if __name__ == '__main__':

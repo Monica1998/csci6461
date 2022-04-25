@@ -1,4 +1,7 @@
 from bdb import effective
+import sys
+sys.path.append('/Users/vishesh.javangula@ibm.com/Documents/Computer_Architecture/proj_1_4641')
+
 from Device import Device
 from PC import ProgramCounter as PC
 #from converter import decimal_to_binary, binary_string_to_decimal
@@ -30,6 +33,7 @@ class CPU:
         self.CC = CC()
         self.IR = IR()
         self.memsize = memsize
+        print('creating memory instance')
         self.Memory = Memory(memsize)
         self.Cache = Cache(self.Memory)
         self.Device = Device()

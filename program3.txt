@@ -5,6 +5,18 @@
 000B 1801 #AIR R0 <- R0 + 1
 000C 091B #STR R1 -> c(27)
 000D 7C1B #CNVRT c(27) to floating, store in F0
-0019 01C0 #floating point value 3.5, c(25)
+000E A019 #LDFR EA = 25,26
+000F 741D #VADD, 
+0010 781D #VSUB
+0019 0180 #floating point value 3.0, c(25)
 001A 0330 #9.5156 in floating point
-001B 0140 #2.5 in floating point, this is our constant used for FADD, FSUB
+001B 7F00 #0.5 in floating point, this is our constant used for FADD, FSUB
+001C 0180 #floating point 3.0, holds length of vectors
+001D 001F #address of v1 
+001E 0022 #address of v2
+001F 0003 #v1[0] = 3
+0020 0004 #v1[1] = 4
+0021 0005 #v1[2] = 5
+0022 0001 #v2[0] = 1
+0023 0002 #v2[1] = 2
+0024 0003 #v2[2] = 3

@@ -3,6 +3,7 @@ from converter import hex_to_decimal
 #Memory class to read in IPL.txt. Using Dictionary to hold (address, instruction) pairs
 class Memory:
     def __init__(self, size=2048):
+        print('IN MEMORY')
         self.size = size
         self.words = dict.fromkeys((range(self.size)), 0)  # index is memory location
         # self.instructions = dict()

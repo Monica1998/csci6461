@@ -97,7 +97,6 @@ def floating_to_fixed(f, e=7):
 def fixed_to_binary(fi, wlen=15,e=7):
     sb = '1' if fi < 0 else '0'
     fi = abs(fi)
-    fi = fi 
     return sb + decimal_to_binary(fi, wlen)
 
 def binary_to_fixed(b):
@@ -131,7 +130,7 @@ if __name__ == '__main__':
 #     print(temp)
 #   #  print(len(temp))
 #     print(binary_to_floating(temp))
-    temp = floating_to_binary(2.5)
+    temp = floating_to_binary(3.0)
     print(binary_string_to_hex(temp))
     #print(binary_string_to_hex(temp))
     
