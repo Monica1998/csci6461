@@ -75,7 +75,6 @@ class CPU:
         For those that need main memory access, the effective address is computed. 
         result or effective address along with decoded instruciton is then pushed to EXE_MEM
         
-
         Args:
             ID_EXE (Queue): holds decoded instruction 
             EXE_MEM (Queue): holds decoded instruction along with result or effective address
@@ -85,7 +84,6 @@ class CPU:
             if ID_EXE.empty() == False and EXE_MEM.empty() == True:
                 opcode, operand, index_register, mode, general_register = ID_EXE.get()
                 if opcode in self.exe_ins:
-                    #TODO: stop iterating the PC for these instructions
                     res = self.single_step(opcode, operand, index_register, mode, general_register) #will do write-back for these instructions
                     EXE_MEM.put((opcode, operand, index_register, mode, general_register, res))
 
@@ -205,15 +203,19 @@ class CPU:
     def LDFR(self, operand, index_register, mode, floating_register, effective_addr):
         #effective_addr = self.get_effective_addr(operand, 0, 0)
 
-        if mode == 1:
-            effective_addr += 1
 
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        res1 = self.MBR.get_val()
+
+        self.MAR.set_val(effective_addr+1)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        res2 = self.MBR.get_val()
+
         #return self.MBR.get_val()
-        return {'Register': 'Floating', 'index': floating_register, 'value': self.MBR.get_val()}
+        return {'Register': 'Floating', 'index': [0,1], 'value': [res1, res2]}
 
         #self.FRs[floating_register].set_val(self.MBR.get_val())
        # self.PC.increment_addr()
@@ -221,14 +223,17 @@ class CPU:
     def STFR(self, operand, index_register, mode, floating_register, effective_addr):
         # effective_addr = self.get_effective_addr(operand, 0, 0)
 
-        if mode == 1:
-            effective_addr += 1
+    
 
         if effective_addr == -1:
             return
-        self.MBR.set_val(self.FRs[floating_register].get_val())
+        self.MBR.set_val(self.FRs[0].get_val())
         #self.Memory.words[effective_addr] = self.MBR.get_val()
         self.Cache.set_word(effective_addr, self.MBR.get_val())
+
+        self.MBR.set_val(self.FRs[1].get_val())
+        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        self.Cache.set_word(effective_addr+1, self.MBR.get_val())
        # self.PC.increment_addr()
 
     # store data from index register into memory

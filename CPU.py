@@ -100,27 +100,35 @@ class CPU:
     def LDFR(self, operand, index_register, mode, floating_register):
         effective_addr = self.get_effective_addr(operand, 0, 0)
 
-        if mode == 1:
-            effective_addr += 1
-
         if effective_addr == -1:
             return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         self.FRs[floating_register].set_val(self.MBR.get_val())
+
+        self.MAR.set_val(effective_addr)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        self.FRs[0].set_val(self.MBR.get_val())
+
+        self.MAR.set_val(effective_addr+1)
+        self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+        self.FRs[1].set_val(self.MBR.get_val())
+
         self.PC.increment_addr()
 
     def STFR(self, operand, index_register, mode, floating_register):
         effective_addr = self.get_effective_addr(operand, 0, 0)
 
-        if mode == 1:
-            effective_addr += 1
-
         if effective_addr == -1:
             return
-        self.MBR.set_val(self.FRs[floating_register].get_val())
-        #self.Memory.words[effective_addr] = self.MBR.get_val()
+            
+        self.MBR.set_val(self.FRs[0].get_val())
         self.Cache.set_word(effective_addr, self.MBR.get_val())
+
+        self.MBR.set_val(self.FRs[1].get_val())
+        self.Cache.set_word(effective_addr+1, self.MBR.get_val())
+
+
         self.PC.increment_addr()
 
     # store data from index register into memory
