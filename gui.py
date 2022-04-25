@@ -55,7 +55,7 @@ frameswitches.grid(row=9, column=0, columnspan=5, padx=50, pady=10)
 frameregister = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 frameregister.grid(row=0, column=0)
 frameoperation = LabelFrame(gui, borderwidth=0, highlightthickness=0)
-frameoperation.grid(row=9, column=6, columnspan=1, padx=50, pady=10)
+frameoperation.grid(row=11, column=6, columnspan=1, padx=50, pady=10)
 # framerun = LabelFrame(gui, borderwidth=0, highlightthickness=0)
 # framerun.grid(row=9, column=7, columnspan=1, padx=100, pady=10)
 # framerun.grid(row=10, column=6, columnspan=1, padx=100, pady=10)
@@ -75,6 +75,9 @@ IXR3Label = Label(gui, text="IXR3(16bits)").grid(row=7, column=0)
 
 SpaceLabelIXR = Label(gui, text=" ").grid(row=8, column=0)
 
+
+
+
 PCLabel = Label(gui, text="PC(12bits)").grid(row=0, column=5)
 MARLabel = Label(gui, text="MAR(12bits)").grid(row=1, column=5)
 MBRLabel = Label(gui, text="MBR(16bits)").grid(row=2, column=5)
@@ -84,6 +87,8 @@ PrivilegedLabel = Label(gui, text="Privileged(1bits)").grid(row=5, column=5)
 KeyboardLabel = Label(gui, text="Keyboard").grid(row=6, column=5)
 PrinterLabel = Label(gui, text="Printer").grid(row=7, column=5)
 TargetLabel = Label(gui, text="Target Word").grid(row=8, column=5)
+FR0Label = Label(gui, text="FR0").grid(row=9, column=5)
+FR1Label = Label(gui, text="FR1").grid(row=10, column=5)
 
 # Initialize Switch Values to 0
 num15: int = 0
@@ -527,6 +532,8 @@ Privileged = Entry(gui, width=30, borderwidth=5)
 Keyboard = Entry(gui, width=30, borderwidth=5)
 Printer = Entry(gui, width=30, borderwidth=5)
 Target = Entry(gui, width=30, borderwidth=5)
+FR0 = Entry(gui, width=30, borderwidth=5)
+FR1 = Entry(gui, width=30, borderwidth=5)
 
 # Initialize register values
 GPR0.insert(0, "0000000000000000")
@@ -545,6 +552,8 @@ Privileged.insert(0, "0")
 Keyboard.insert(0, "")
 Printer.insert(0, "")
 Target.insert(0, "")
+FR0.insert(0, "")
+FR1.insert(0, "")
 
 # Placing Register textboxes
 GPR0.grid(row=0, column=1)
@@ -565,7 +574,8 @@ Privileged.grid(row=5, column=6)
 Keyboard.grid(row=6, column=6)
 Printer.grid(row=7, column=6)
 Target.grid(row=8, column=6)
-
+FR0.grid(row=9, column=6)
+FR1.grid(row=10, column=6)
 
 # LD function for each register
 def LD_GPR0():
@@ -881,6 +891,13 @@ def init():
 def program2():
     filename2 = fd.askopenfilenames()
 
+def LD_FR0():
+    pass
+
+def LD_FR1():
+    pass
+
+
 
 # Place the LD buttons in the grid
 GPR0_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_GPR0).grid(row=0, column=2)
@@ -897,6 +914,8 @@ MAR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MAR).grid(row=1, colu
 MBR_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_MBR).grid(row=2, column=7)
 KB_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_KB).grid(row=6, column=7)
 TW_LD = Button(gui, text="Enter", padx=1, pady=1, command=LD_TW).grid(row=8, column=7)
+FR0_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_FR0).grid(row=9, column=7)
+FR1_LD = Button(gui, text="LD", padx=1, pady=1, command=LD_FR1).grid(row=10, column=7)
 # def cache():
 #     cachew.open()
 
@@ -922,20 +941,20 @@ RunLight.insert(0, "0")
 HaltLight.insert(0, "0")
 
 # Placing Run and Halt labels and lights on the grid
-HaltLabel.grid(row=9, column=4)
-RunLabel.grid(row=9, column=5)
-HaltLight.grid(row=8, column=4)
-RunLight.grid(row=8, column=5)
+HaltLabel.grid(row=13, column=4)
+RunLabel.grid(row=13, column=5)
+HaltLight.grid(row=12, column=4)
+RunLight.grid(row=12, column=5)
 
 # Placing operation buttons on the grid
-Store.grid(row=10, column=2)
-StorePlus.grid(row=10, column=3)
-Load.grid(row=10, column=4)
-Init.grid(row=10, column=5)
-SS.grid(row=10, column=0)
+Store.grid(row=14, column=2)
+StorePlus.grid(row=14, column=3)
+Load.grid(row=14, column=4)
+Init.grid(row=14, column=5)
+SS.grid(row=14, column=0)
 # Program2.grid(row=9, column=11)
 
-Run.grid(row=10, column=3)
+Run.grid(row=14, column=3)
 # Cache.grid(row=1, column=7)
 
 
