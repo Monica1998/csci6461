@@ -1,3 +1,6 @@
+import threading
+import time
+
 from Device import Device
 from PC import ProgramCounter as PC
 #from converter import decimal_to_binary, binary_string_to_decimal
@@ -63,7 +66,7 @@ class CPU:
         if effective_addr == -1:
             return
         self.MBR.set_val(self.GRs[general_register].get_val())
-        #self.Memory.words[effective_addr] = self.MBR.get_val()
+        # self.Memory.words[effective_addr] = self.MBR.get_val()
         self.Cache.set_word(effective_addr, self.MBR.get_val())
         self.PC.increment_addr()
 
@@ -80,7 +83,7 @@ class CPU:
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
-        #self.MBR.set_val(self.Memory.words[effective_addr])
+        # self.MBR.set_val(self.Memory.words[effective_addr])
         self.MBR.set_val(self.Cache.get_word(effective_addr))
         self.IndexRegisters[index_register - 1].set_val(self.MBR.get_val())
         self.PC.increment_addr()
@@ -89,7 +92,7 @@ class CPU:
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
-        #self.MBR.set_val(self.Memory.words[effective_addr])
+        # self.MBR.set_val(self.Memory.words[effective_addr])
         self.MBR.set_val(self.Cache.get_word(effective_addr))
         self.IndexRegisters[general_register - 1].set_val(self.MBR.get_val())
         self.PC.increment_addr()
@@ -127,7 +130,7 @@ class CPU:
             return
         self.MAR.set_val(effective_addr)
         self.MBR.set_val(self.IndexRegisters[index_register - 1].get_val())
-        #self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
+        # self.Memory.words[self.MAR.get_val()] = self.MBR.get_val()
         self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
         self.PC.increment_addr()
 
@@ -170,7 +173,7 @@ class CPU:
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
             return
-        print(effective_addr )
+        print(effective_addr)
         self.MAR.set_val(effective_addr)
         self.PC.set_addr(effective_addr)
 
@@ -226,7 +229,7 @@ class CPU:
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
-        #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        # self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
 
         result = self.GRs[general_register].get_val() + self.MBR.get_val()
@@ -252,7 +255,7 @@ class CPU:
         self.MAR.set_val(effective_addr)
 
         # TODO: fetch from cache(self.MAR.get_val())
-        #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+        # self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
 
         result = self.GRs[general_register].get_val() - self.MBR.get_val()
@@ -456,7 +459,6 @@ class CPU:
             pass
         self.PC.increment_addr()
 
-
     def FADD(self, operand, index_register, mode, floating_register):
         effective_addr = self.get_effective_addr(operand, index_register, mode)
         if effective_addr == -1:
@@ -537,16 +539,64 @@ class CPU:
                 self.CC.set_val(binary_string_to_decimal(bits))
         #check underflow
             elif (result > 0 and result < MAX_DEC_FP) or (result < 0 and result > MIN_DEC_FP):
+                self.GRs[general_register].set_val(result)
+            if F == 1:
+                # concert c(EA) to floating point, store in FR0
+                temp = binary_to_fixed(temp)
+                result = fixed_to_floating(temp)
+                self.FRs[0].set_val(result)
+    def VADD(self, addr_v1, ix, i, fr):
+        addr_v2 = addr_v1 + 1
+        effective_addr_v1 = self.get_effective_addr(addr_v1, ix, i)
+        effective_addr_v2 = self.get_effective_addr(addr_v2, ix, i)
+        fr = 3
+        for i in range(fr):
+            self.MAR.set_val(effective_addr_v1 + i)
+            self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+            v1 = self.MBR.get_val()
+            self.MAR.set_val(effective_addr_v2 + i)
+            self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+            v2 = self.MBR.get_val()
+            result = v1 + v2
+            if result > 64:
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+            elif result < -63:
                 bits = decimal_to_binary(self.CC.get_val(), bit=4)
                 bits = bits[:1] + '1' + bits[2:]
                 self.CC.set_val(binary_string_to_decimal(bits))
             else:
-                self.GRs[general_register].set_val(result)
-        if F == 1: 
-            #concert c(EA) to floating point, store in FR0
-            temp = binary_to_fixed(temp)
-            result = fixed_to_floating(temp)
-            self.FRs[0].set_val(result)
+                self.MBR.set_val(result)
+                self.MAR(effective_addr_v1 + i)
+                self.Cache.set_word(self.MAR.get_val(), result)
+        self.PC.increment_addr()
+
+    def VSUB(self, addr_v1, ix, i, fr):
+        addr_v2 = addr_v1 + 1
+        effective_addr_v1 = self.get_effective_addr(addr_v1, ix, i)
+        effective_addr_v2 = self.get_effective_addr(addr_v2, ix, i)
+        fr = 3
+        for i in range(fr):
+            self.MAR.set_val(effective_addr_v1 + i)
+            self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+            v1 = self.MBR.get_val()
+            self.MAR.set_val(effective_addr_v2 + i)
+            self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
+            v2 = self.MBR.get_val()
+            result = v1 - v2
+            if result > 64:
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = '1' + bits[1:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+            elif result < -63:
+                bits = decimal_to_binary(self.CC.get_val(), bit=4)
+                bits = bits[:1] + '1' + bits[2:]
+                self.CC.set_val(binary_string_to_decimal(bits))
+            else:
+                self.MBR.set_val(result)
+                self.MAR(effective_addr_v1 + i)
+                self.Cache.set_word(self.MAR.get_val(), result)
         self.PC.increment_addr()
 
     def TRAP(self, trap_code, index_register, mode, general_register):
@@ -555,17 +605,17 @@ class CPU:
             bits = bits[:2] + '1' + bits[3:]
             self.MFR.set_val(binary_string_to_decimal(bits))
 
-        #Store PC for TRAP
+        # Store PC for TRAP
         self.MAR.set_val(2)
         self.MBR.set_val(self.PC.get_addr() + 1)
         self.Cache.set_word(self.MAR.get_val(), self.MBR.get_val())
 
-        #gets address of trap table 
+        # gets address of trap table
         self.MAR.set_val(0)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         table_addr = self.MBR.get_val()
 
-        #set PC to mapped rountine from trap table
+        # set PC to mapped rountine from trap table
         self.MAR.set_val(trap_code + table_addr)
         self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
         routine = self.MBR.get_val()
@@ -591,14 +641,14 @@ class CPU:
             if index_register == 0:
                 if self.check_addr(operand):
                     self.MAR.set_val(operand)
-                    #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    # self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
                     self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
                 else:
                     return -1
             else:
                 if self.check_addr(operand + self.IndexRegisters[index_register - 1].get_val()):
                     self.MAR.set_val(operand + self.IndexRegisters[index_register - 1].get_val())
-                    #self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
+                    # self.MBR.set_val(self.Memory.words[self.MAR.get_val()])
                     self.MBR.set_val(self.Cache.get_word(self.MAR.get_val()))
                 else:
                     return -1
@@ -611,7 +661,6 @@ class CPU:
     # validates effective address does not violate memory constraints
     def check_addr(self, addr):
         # Reserved memory location.
-        
 
         if 0 <= addr < 6:
             bits = decimal_to_binary(self.MFR.get_val(), bit=4)
@@ -643,7 +692,7 @@ class CPU:
         self.PC.increment_addr()  # points to next instruction
 
         addr = self.MAR.get_val()
-        #self.MBR.set_val(self.Memory.words[addr])
+        # self.MBR.set_val(self.Memory.words[addr])
         self.MBR.set_val(self.Cache.get_word(addr))
 
         self.IR.set_instruction(self.MBR.get_val())
@@ -700,6 +749,10 @@ class CPU:
             return self.SRC(operand, index_register, mode, general_register)
         elif opcode == 26:
             return self.RRC(operand, index_register, mode, general_register)
+        elif opcode == 29:
+            return self.VADD(operand, index_register, mode, general_register)
+        elif opcode == 30:
+            return self.VSUB(operand, index_register, mode, general_register)
         elif opcode == 49:
             return self.IN(operand, index_register, mode, general_register)
         elif opcode == 50:
@@ -779,6 +832,10 @@ class CPU:
             return self.STFR(operand, index_register, mode, general_register)
         elif opcode == 31:
             return self.CNVRT(operand, index_register, mode, general_register)
+        elif opcode == 29:
+            return self.VADD(operand, index_register, mode, general_register)
+        elif opcode == 30:
+            return self.VSUB(operand, index_register, mode, general_register)
         elif opcode == 49:
             return self.IN(operand, index_register, mode, general_register)
         elif opcode == 50:
@@ -805,8 +862,6 @@ def main():
     cpu.GRs[0].set_val(1)
     cpu.CNVRT(12, 0, 0, 0)
     cpu.LDFR(9, 0, 0, 1)
-
-
 
 if __name__ == '__main__':
     main()
