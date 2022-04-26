@@ -8,6 +8,7 @@
 000E A019 #LDFR EA = 25,26
 000F 741D #VADD, 
 0010 781D #VSUB
+0011 0000 #HALT
 0019 0180 #floating point value 3.0, c(25)
 001A 0330 #9.5156 in floating point
 001B 7F00 #0.5 in floating point, this is our constant used for FADD, FSUB

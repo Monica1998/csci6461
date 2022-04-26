@@ -721,10 +721,12 @@ def show_floating_register(floating_register):
     match floating_register:
         case 0:
             FR0.delete(0, END)
-            FR0.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[0].get_val()))))
+            FR0.insert(0, str(floating_to_binary(cpu.FRs[0].get_val())))
+            #FR0.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[0].get_val()))))
         case 1:
             FR1.delete(0, END)
-            FR1.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[1].get_val()))))
+            #FR1.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[1].get_val()))))
+            FR1.insert(0, str(floating_to_binary(cpu.FRs[1].get_val())))
 
 def LD_FR0():
     pass
