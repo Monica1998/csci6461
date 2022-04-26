@@ -717,16 +717,15 @@ def show_general_register(general_register):
             GPR3.delete(0, END)
             GPR3.insert(0, str(decimal_to_binary(cpu.GRs[3].get_val())))
 
-def show_floating_register(floating_register):
-    match floating_register:
-        case 0:
-            FR0.delete(0, END)
-            FR0.insert(0, str(floating_to_binary(cpu.FRs[0].get_val())))
-            #FR0.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[0].get_val()))))
-        case 1:
-            FR1.delete(0, END)
-            #FR1.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[1].get_val()))))
-            FR1.insert(0, str(floating_to_binary(cpu.FRs[1].get_val())))
+def show_floating_register():
+        
+        FR0.delete(0, END)
+        FR0.insert(0, str(floating_to_binary(cpu.FRs[0].get_val())))
+        #FR0.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[0].get_val()))))
+    
+        FR1.delete(0, END)
+        #FR1.insert(0, str(fixed_to_binary(floating_to_fixed(cpu.FRs[1].get_val()))))
+        FR1.insert(0, str(floating_to_binary(cpu.FRs[1].get_val())))
 
 def LD_FR0():
     pass
@@ -769,6 +768,8 @@ def reset():
     IXR1.delete(0, END)
     IXR2.delete(0, END)
     IXR3.delete(0, END)
+    FR0.delete(0, END)
+    FR1.delete(0,END)
     PC.delete(0, END)
     MAR.delete(0, END)
     MBR.delete(0, END)
@@ -783,6 +784,8 @@ def reset():
     IXR1.insert(0, "0000000000000000")
     IXR2.insert(0, "0000000000000000")
     IXR3.insert(0, "0000000000000000")
+    FR0.insert(0, "0000000000000000")
+    FR1.insert(0, "0000000000000000")
     PC.insert(0, "000000000000")
     MAR.insert(0, "000000000000")
     MBR.insert(0, "0000000000000000")
@@ -862,7 +865,7 @@ def singlestep():
         MFR.delete(0, END)
         MFR.insert(0, str(decimal_to_binary(cpu.MFR.get_val(), 4)))
       
-        show_floating_register(general_register)
+        show_floating_register()
         show_general_register(general_register)
         show_index_register(index_register)
         Printer.delete(0, END)
